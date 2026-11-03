@@ -17,6 +17,10 @@ except ImportError:
 
 str_lit.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
+# Initialize Session State to prevent data loss on rerun
+if "processed_result" not in str_lit.session_state:
+    str_lit.session_state.processed_result = ""
+
 # Custom Burgundy Brand Styling & UI
 str_lit.markdown("""
     <style>
@@ -206,27 +210,30 @@ else:
     if not source_text.strip():
         source_text = client_notes
 
-    processed_result = ""
-    
+    # Process and save permanently into session state when button is clicked
     if str_lit.button("🚀 Process & Execute Request"):
         if uploaded_file is not None or source_text.strip():
             with str_lit.spinner("Processing file and generating formatted deliverables..."):
                 content_to_show = source_text if source_text.strip() else f"Processed file: {uploaded_file.name}"
                 
                 if "Translation" in service_choice:
-                    processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{content_to_show}\n\n[Translation formatted for international standard delivery.]"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{content_to_show}\n\n[Translation formatted for international standard delivery.]"
                 elif "Transcription" in service_choice:
-                    processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n[00:00] Start of Media Recording: {uploaded_file.name if uploaded_file else 'Audio File'}\n\n{content_to_show}\n\n[End of Transcript - Verified Accurate]"
+                    str_lit.session_state.processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n[00:00] Start of Media Recording: {uploaded_file.name if uploaded_file else 'Media File'}\n\n{content_to_show}\n\n[End of Transcript - Verified Accurate]"
                 elif "ATS CV" in service_choice:
-                    processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{content_to_show}\n\n[Optimized successfully with targeted keywords and professional layout.]"
+                    str_lit.session_state.processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{content_to_show}\n\n[Optimized successfully with targeted keywords and professional layout.]"
                 elif "Cover Letter" in service_choice:
-                    processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{content_to_show}\n\nSincerely,\nGlobal Professional Services Hub"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{content_to_show}\n\nSincerely,\nGlobal Professional Services Hub"
                 else:
-                    processed_result = f"=== PROFESSIONAL EDITING & PROOFREADING ===\n\n{content_to_show}\n\n[Grammar, syntax, and flow fully polished.]"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL EDITING & PROOFREADING ===\n\n{content_to_show}\n\n[Grammar, syntax, and flow fully polished.]"
 
             str_lit.success("🎉 Request processed successfully! Choose your preferred download format below.")
         else:
             str_lit.warning("Please upload a file or paste text first.")
+
+    # Always display current result if available
+    if str_lit.session_state.processed_result:
+        str_lit.text_area("Live Preview of Processed Output:", value=str_lit.session_state.processed_result, height=150)
 
     str_lit.markdown("---")
 
@@ -265,7 +272,7 @@ else:
     str_lit.subheader("📥 Download Completed Deliverables (Multiple Formats)")
 
     fallback_text = 'Click "Process & Execute Request" above to generate your deliverable.'
-    final_output_text = processed_result if processed_result else fallback_text
+    final_output_text = str_lit.session_state.processed_result if str_lit.session_state.processed_result else fallback_text
 
     col_dl1, col_dl2 = str_lit.columns(2)
 
