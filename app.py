@@ -17,7 +17,7 @@ except ImportError:
 
 str_lit.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
-# Custom Burgundy Brand Styling & UI
+# Custom Burgundy Brand Styling & AI Badge UI
 str_lit.markdown("""
     <style>
     .main-header {
@@ -36,13 +36,22 @@ str_lit.markdown("""
         font-weight: 500;
         margin-bottom: 25px;
     }
-    .free-badge {
+    .ai-badge {
         background-color: #FDF2F4;
         color: #800020;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        border: 1px solid #F5C6CB;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .free-badge {
+        background-color: #E6F4EA;
+        color: #137333;
         padding: 4px 10px;
         border-radius: 5px;
         font-weight: bold;
-        border: 1px solid #F5C6CB;
     }
     .stButton>button {
         background-color: #800020;
@@ -59,7 +68,8 @@ str_lit.markdown("""
 
 # App Header
 str_lit.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
-str_lit.markdown('<p class="sub-text">Automated Audio Transcription, Contextual Translation & ATS CV Generation via Gemini AI</p>', unsafe_allow_html=True)
+str_lit.markdown('<p class="sub-text">Automated Audio Transcription, Contextual Translation & ATS CV Generation</p>', unsafe_allow_html=True)
+str_lit.markdown('<div class="ai-badge">🤖 Powered by Advanced Google Gemini AI Engine</div>', unsafe_allow_html=True)
 str_lit.markdown("---")
 
 # --- ADMIN AUTHENTICATION SECURITY ---
@@ -97,7 +107,7 @@ str_lit.sidebar.header("📂 Select a Service")
 service_choice = str_lit.sidebar.selectbox(
     "Choose what you need:",
     [
-        "🌍 Document Translation (Gemini Powered)",
+        "🌍 Document Translation (Gemini AI)",
         "🎙️ Audio / Video Transcription",
         "📄 ATS CV Generation & Optimization",
         "✉️ Cover Letter Writing",
@@ -129,7 +139,7 @@ if service_choice == "⚙️ Admin Dashboard":
     if is_admin:
         str_lit.markdown('<span class="free-badge">ADMIN ACCESS UNLOCKED</span>', unsafe_allow_html=True)
         str_lit.markdown("""
-        * **Status:** Operational (Connected to Gemini Engine)
+        * **Status:** Operational (Gemini AI Engine Online)
         * **Active Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
         * **Active CBE Account:** `1000296269488` (Leamare Branch, Lem Hotel Area, Addis Ababa)
         """)
@@ -180,7 +190,7 @@ else:
     str_lit.markdown("---")
     str_lit.subheader("📁 Upload Your Files or Details")
     uploaded_file = str_lit.file_uploader("Upload document, resume, or text file:", type=["pdf", "docx", "txt"])
-    client_notes = str_lit.text_area("Or type/paste text directly here for Gemini AI processing:")
+    client_notes = str_lit.text_area("Or type/paste text directly here for AI processing:")
 
     source_text = ""
     if uploaded_file is not None:
@@ -192,9 +202,9 @@ else:
                     if txt:
                         source_text += txt + "\n"
             except Exception as e:
-                source_text = f"[PDF Uploaded Successfully: {uploaded_file.name}]"
+                source_text = f"[Error reading PDF: {e}]"
         else:
-            source_text = f"[File Uploaded: {uploaded_file.name}]"
+            source_text = f"[Uploaded File: {uploaded_file.name}]"
     
     if not source_text.strip():
         source_text = client_notes
@@ -202,35 +212,36 @@ else:
     processed_result = ""
     
     if str_lit.button("🚀 Process & Translate with Gemini AI"):
-        # Relaxed check: proceeds if either a file is uploaded OR notes are provided
         if uploaded_file is not None or source_text.strip():
-            with str_lit.spinner("Connecting to Gemini AI for professional contextual processing..."):
+            with str_lit.spinner("🤖 Gemini AI is actively processing and translating your content..."):
                 try:
                     api_key = str_lit.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
                     text_to_process = source_text if source_text.strip() else f"Process uploaded file: {uploaded_file.name}"
                     
                     if not api_key and HAS_GEMINI:
-                        processed_result = text_to_process
+                        processed_result = f"[Warning: GEMINI_API_KEY not configured in secrets]\n\n{text_to_process}"
                     elif HAS_GEMINI:
+                        # Correct official Google GenAI SDK Client Initialization
                         client = genai.Client(api_key=api_key)
                         
                         if "Translation" in service_choice:
-                            prompt = f"Act as an expert professional translator. Provide a contextually smooth translation of the following text from {src_lang_name} to {tgt_lang_name}:\n\n{text_to_process[:5000]}"
+                            prompt = f"Act as an expert professional translator and localization specialist. Provide a contextually smooth, highly polished, and accurate translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{text_to_process[:5000]}"
                         elif "ATS CV" in service_choice:
-                            prompt = f"Act as an expert career strategist and ATS specialist. Optimize and rewrite this CV:\n\n{text_to_process[:5000]}"
+                            prompt = f"Act as an expert career strategist and ATS specialist. Rewrite, optimize, and format the following CV text for high ATS ranking and professional presentation:\n\n{text_to_process[:5000]}"
                         else:
-                            prompt = f"Act as an expert editor. Polish and enhance this text:\n\n{text_to_process[:5000]}"
+                            prompt = f"Act as an expert editor. Thoroughly proofread, polish, and enhance the following text professionally:\n\n{text_to_process[:5000]}"
 
-                        response = client.interactions.create(
-                            model="gemini-3.8-flash",
-                            input=prompt
+                        # Correct method call for Google GenAI SDK
+                        response = client.models.generate_content(
+                            model="gemini-2.5-flash",
+                            contents=prompt
                         )
-                        processed_result = response.output_text
+                        processed_result = response.text
                     else:
                         processed_result = text_to_process
                 except Exception as e:
-                    processed_result = f"Processing notice: {e}\n\nContent: {text_to_process}"
-            str_lit.success("🎉 Processed smoothly!")
+                    processed_result = f"AI processing notice: {e}\n\nContent: {text_to_process}"
+            str_lit.success("🎉 Successfully processed and generated by Gemini AI!")
         else:
             str_lit.warning("Please upload a document or paste text first.")
 
@@ -272,10 +283,11 @@ else:
 
     fallback_notice = 'Click Process & Translate with Gemini AI above.'
     full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - GEMINI AI OUTPUT ===
-Service: {service_choice}
+Service Processed: {service_choice}
+Technology Engine: Powered by Google Gemini AI
 Source File: {uploaded_file.name if uploaded_file else 'Direct Text Input'}
 
---- AI PROCESSED RESULT ---
+--- AI GENERATED / TRANSLATED RESULT ---
 {processed_result if processed_result else fallback_notice}
 
 --- VERIFIED PAYMENT & BANK DETAILS ---
@@ -286,6 +298,6 @@ Telebirr Account: 0916884912 | Holder: Belayhun Adefrese Metaferia
     str_lit.download_button(
         label="📄 Download Processed Document (.TXT)",
         data=full_output,
-        file_name="gemini_processed_output.txt",
+        file_name="gemini_ai_processed_output.txt",
         mime="text/plain"
     )
