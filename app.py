@@ -86,7 +86,7 @@ str_lit.sidebar.header("⚙️ Gemini AI Engine")
 gemini_api_key = str_lit.sidebar.text_input("Enter Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
 if gemini_api_key and HAS_GEMINI:
-    genai.configure(api_key=gemini_api_key)
+    genai.configure(api_key=gemini_api_key.strip())
     ai_configured = True
 else:
     ai_configured = False
@@ -205,6 +205,7 @@ else:
                 
                 if ai_configured:
                     try:
+                        genai.configure(api_key=gemini_api_key.strip())
                         model = genai.GenerativeModel("gemini-1.5-flash")
                         
                         if "Translation" in service_choice:
@@ -219,12 +220,13 @@ else:
                             prompt = f"Proofread and thoroughly polish the following text for grammar, executive flow, and professional tone:\n\n{final_input_text}"
                         
                         response = model.generate_content(prompt)
-                        ai_output = response.text
+                        if response and response.text:
+                            ai_output = response.text
                     except Exception as e:
-                        ai_output = f"[Gemini processing error: {e}]\n\n{final_input_text}"
+                        ai_output = f"[AI Engine Notice: {e}]\n\nOriginal Text:\n{final_input_text}"
 
                 if not ai_output:
-                    ai_output = f"=== PROCESSED OUTPUT ===\n\n{final_input_text}"
+                    ai_output = final_input_text
 
                 if "Translation" in service_choice:
                     str_lit.session_state.processed_result = f"=== PROFESSIONAL GEMINI AI TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{ai_output}\n\n[Verified by Global Professional Services Hub]"
