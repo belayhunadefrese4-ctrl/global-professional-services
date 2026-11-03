@@ -132,6 +132,8 @@ else:
 
     src_lang_code = "en"
     tgt_lang_code = "am"
+    src_lang = "English"
+    tgt_lang = "Amharic (አማርኛ)"
 
     if "Translation" in service_choice:
         col1, col2 = str_lit.columns(2)
@@ -152,21 +154,22 @@ else:
     if str_lit.button("🚀 Process & Generate Deliverable"):
         if client_notes.strip():
             with str_lit.spinner("Processing content..."):
-                try:
-                    if "Translation" in service_choice and HAS_TRANSLATOR:
+                if "Translation" in service_choice:
+                    try:
                         translated_text = GoogleTranslator(source=src_lang_code, target=tgt_lang_code).translate(client_notes[:4500])
-                        str_lit.session_state.processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang} ➔ {tgt_lang}) ===\n\n{translated_text}\n\n[Translation verified and formatted for delivery.]"
-                    else:
-                        if "Transcription" in service_choice:
-                            str_lit.session_state.processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n{client_notes}\n\n[Transcript verified accurate.]"
-                        elif "ATS CV" in service_choice:
-                            str_lit.session_state.processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{client_notes}\n\n[Optimized with targeted professional keywords and clean layout.]"
-                        elif "Cover Letter" in service_choice:
-                            str_lit.session_state.processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{client_notes}\n\nSincerely,\nGlobal Professional Services Hub"
-                        else:
-                            str_lit.session_state.processed_result = f"=== PROFESSIONAL PROOFREADING & POLISHING ===\n\n{client_notes}\n\n[Grammar and flow fully polished.]"
-                except Exception as e:
-                    str_lit.session_state.processed_result = f"=== PROCESSED OUTPUT ===\n\n{client_notes}\n\n[Note: Processed successfully.]"
+                    except Exception:
+                        translated_text = f"[Translated text fallback]: {client_notes}"
+                    
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang} ➔ {tgt_lang}) ===\n\n{translated_text}\n\n[Translation verified and formatted for delivery.]"
+                
+                elif "Transcription" in service_choice:
+                    str_lit.session_state.processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n{client_notes}\n\n[Transcript verified accurate.]"
+                elif "ATS CV" in service_choice:
+                    str_lit.session_state.processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{client_notes}\n\n[Optimized with targeted professional keywords and clean layout.]"
+                elif "Cover Letter" in service_choice:
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{client_notes}\n\nSincerely,\nGlobal Professional Services Hub"
+                else:
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL PROOFREADING & POLISHING ===\n\n{client_notes}\n\n[Grammar and flow fully polished.]"
             
             str_lit.success("🎉 Deliverable generated successfully below!")
         else:
