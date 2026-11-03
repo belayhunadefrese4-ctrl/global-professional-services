@@ -1,5 +1,12 @@
 import streamlit as st
-from pypdf import PdfReader
+import io
+
+# Safe import for PDF reading
+try:
+    from pypdf import PdfReader
+    HAS_PYPDF = True
+except ImportError:
+    HAS_PYPDF = False
 
 st.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
@@ -94,10 +101,10 @@ else:
     uploaded_file = st.file_uploader("Upload document, resume, or audio:", type=["pdf", "docx", "txt", "mp3", "wav"])
     client_notes = st.text_area("Specific instructions or job description:")
 
-    # Read PDF text
+    # Read file content safely
     extracted_text = ""
     if uploaded_file is not None:
-        if uploaded_file.name.endswith(".pdf"):
+        if uploaded_file.name.endswith(".pdf") and HAS_PYPDF:
             try:
                 reader = PdfReader(uploaded_file)
                 for page in reader.pages:
@@ -107,9 +114,12 @@ else:
             except Exception as e:
                 extracted_text = f"Error reading PDF text: {e}"
         elif uploaded_file.name.endswith(".txt"):
-            extracted_text = uploaded_file.getvalue().decode("utf-8")
+            try:
+                extracted_text = uploaded_file.getvalue().decode("utf-8")
+            except:
+                extracted_text = "[Text file uploaded]"
         else:
-            extracted_text = f"[Uploaded File: {uploaded_file.name}]"
+            extracted_text = f"[Uploaded File: {uploaded_file.name} ({uploaded_file.size} bytes)]"
 
     if st.button("🚀 Process File & Generate Output"):
         if uploaded_file or client_notes:
@@ -122,7 +132,7 @@ else:
 Service: {service_choice}
 Source File: {uploaded_file.name if uploaded_file else 'Text Notes'}
 
---- EXTRACTED FILE TEXT ---
+--- EXTRACTED FILE TEXT / NOTES ---
 {extracted_text if extracted_text else client_notes}
 
 --- PROFESSIONAL REVIEW & SUMMARY ---
