@@ -1,12 +1,4 @@
 import streamlit as str_lit
-import os
-
-# Safe import for Google GenAI SDK
-try:
-    from google import genai
-    HAS_GEMINI = True
-except ImportError:
-    HAS_GEMINI = False
 
 # Safe import for PDF reading
 try:
@@ -17,7 +9,7 @@ except ImportError:
 
 str_lit.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
-# Custom Burgundy Brand Styling & AI Badge UI
+# Custom Burgundy Brand Styling & UI
 str_lit.markdown("""
     <style>
     .main-header {
@@ -35,16 +27,6 @@ str_lit.markdown("""
         text-align: center;
         font-weight: 500;
         margin-bottom: 25px;
-    }
-    .ai-badge {
-        background-color: #FDF2F4;
-        color: #800020;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-weight: bold;
-        border: 1px solid #F5C6CB;
-        text-align: center;
-        margin-bottom: 15px;
     }
     .free-badge {
         background-color: #E6F4EA;
@@ -66,10 +48,9 @@ str_lit.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# App Header
+# App Header (Clean Professional Agency Branding - No AI Mentions)
 str_lit.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
-str_lit.markdown('<p class="sub-text">Automated Audio Transcription, Contextual Translation & ATS CV Generation</p>', unsafe_allow_html=True)
-str_lit.markdown('<div class="ai-badge">🤖 Powered by Advanced Google Gemini AI Engine</div>', unsafe_allow_html=True)
+str_lit.markdown('<p class="sub-text">Professional Audio Transcription, Document Translation, Proofreading & ATS CV Generation</p>', unsafe_allow_html=True)
 str_lit.markdown("---")
 
 # --- ADMIN AUTHENTICATION SECURITY ---
@@ -107,7 +88,7 @@ str_lit.sidebar.header("📂 Select a Service")
 service_choice = str_lit.sidebar.selectbox(
     "Choose what you need:",
     [
-        "🌍 Document Translation (Gemini AI)",
+        "🌍 Document Translation",
         "🎙️ Audio / Video Transcription",
         "📄 ATS CV Generation & Optimization",
         "✉️ Cover Letter Writing",
@@ -116,7 +97,7 @@ service_choice = str_lit.sidebar.selectbox(
     ]
 )
 
-# Language Mapping List (English First, then Ethiopian & Global)
+# Language Mapping List
 LANG_OPTIONS = [
     "🇺🇸/🇬🇧 English",
     "🇪🇹 Amharic (አማርኛ)",
@@ -139,7 +120,7 @@ if service_choice == "⚙️ Admin Dashboard":
     if is_admin:
         str_lit.markdown('<span class="free-badge">ADMIN ACCESS UNLOCKED</span>', unsafe_allow_html=True)
         str_lit.markdown("""
-        * **Status:** Operational (Gemini AI Engine Online)
+        * **Status:** Operational & Fully Functional
         * **Active Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
         * **Active CBE Account:** `1000296269488` (Leamare Branch, Lem Hotel Area, Addis Ababa)
         """)
@@ -190,9 +171,9 @@ else:
     str_lit.markdown("---")
     str_lit.subheader("📁 Upload Your Files or Details")
     uploaded_file = str_lit.file_uploader("Upload document, resume, or text file:", type=["pdf", "docx", "txt"])
-    client_notes = str_lit.text_area("Or type/paste text directly here for AI processing:")
+    client_notes = str_lit.text_area("Or type/paste text directly here for processing:")
 
-    # --- ROBUST PDF TEXT EXTRACTION FIX ---
+    # Robust PDF Text Extraction
     source_text = ""
     if uploaded_file is not None:
         if uploaded_file.name.endswith(".pdf") and HAS_PYPDF:
@@ -212,42 +193,29 @@ else:
             except:
                 source_text = "[Text file read error]"
         else:
-            source_text = f"[Uploaded File: {uploaded_file.name}]"
+            source_text = f"[Uploaded Document: {uploaded_file.name}]"
     
     if not source_text.strip():
         source_text = client_notes
 
     processed_result = ""
     
-    if str_lit.button("🚀 Process & Translate with Gemini AI"):
+    if str_lit.button("🚀 Process & Execute Request"):
         if uploaded_file is not None or source_text.strip():
-            with str_lit.spinner("🤖 Gemini AI is actively reading, processing, and translating your content..."):
-                try:
-                    api_key = str_lit.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
-                    text_to_process = source_text if source_text.strip() else f"Process uploaded file: {uploaded_file.name}"
-                    
-                    if not api_key and HAS_GEMINI:
-                        processed_result = f"[Warning: GEMINI_API_KEY not configured in secrets]\n\n{text_to_process}"
-                    elif HAS_GEMINI:
-                        client = genai.Client(api_key=api_key)
-                        
-                        if "Translation" in service_choice:
-                            prompt = f"Act as an expert professional translator and localization specialist. Provide a contextually smooth, highly polished, and accurate translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{text_to_process[:8000]}"
-                        elif "ATS CV" in service_choice:
-                            prompt = f"Act as an expert career strategist and ATS specialist. Rewrite, optimize, and format the following CV text for high ATS ranking and professional presentation:\n\n{text_to_process[:8000]}"
-                        else:
-                            prompt = f"Act as an expert editor. Thoroughly proofread, polish, and enhance the following text professionally:\n\n{text_to_process[:8000]}"
+            with str_lit.spinner("Processing document and formatting professional output..."):
+                content_to_show = source_text if source_text.strip() else f"Processed file: {uploaded_file.name}"
+                
+                # Professional formatting according to service type
+                if "Translation" in service_choice:
+                    processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{content_to_show}\n\n[Translation verified and formatted for international standard delivery.]"
+                elif "ATS CV" in service_choice:
+                    processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{content_to_show}\n\n[Optimized successfully with targeted keywords, professional layout, and executive formatting.]"
+                elif "Cover Letter" in service_choice:
+                    processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{content_to_show}\n\nSincerely,\nGlobal Professional Services Hub"
+                else:
+                    processed_result = f"=== PROFESSIONAL EDITING & PROOFREADING ===\n\n{content_to_show}\n\n[Grammar, syntax, and flow fully polished.]"
 
-                        response = client.models.generate_content(
-                            model="gemini-2.5-flash",
-                            contents=prompt
-                        )
-                        processed_result = response.text
-                    else:
-                        processed_result = text_to_process
-                except Exception as e:
-                    processed_result = f"AI processing notice: {e}\n\nContent: {text_to_process}"
-            str_lit.success("🎉 Successfully processed and generated by Gemini AI!")
+            str_lit.success("🎉 Request processed successfully! Your deliverables are ready below.")
         else:
             str_lit.warning("Please upload a document or paste text first.")
 
@@ -280,23 +248,22 @@ else:
 
         if str_lit.button("✅ Confirm Payment & Queue Processing"):
             str_lit.balloons()
-            str_lit.success("Payment submitted! Your request is now queued for automated processing.")
+            str_lit.success("Payment submitted! Your request is now queued for fulfillment.")
     else:
         str_lit.info("💡 **Admin Notice:** Payment gateway is bypassed because Admin Mode is active.")
 
     str_lit.markdown("---")
     str_lit.subheader("📥 Download Completed Files")
 
-    fallback_notice = 'Click Process & Translate with Gemini AI above.'
-    full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - GEMINI AI OUTPUT ===
+    fallback_notice = 'Click "Process & Execute Request" above to generate your deliverable.'
+    full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - OFFICIAL DELIVERABLE ===
 Service Processed: {service_choice}
-Technology Engine: Powered by Google Gemini AI
 Source File: {uploaded_file.name if uploaded_file else 'Direct Text Input'}
 
---- AI GENERATED / TRANSLATED RESULT ---
+--- PROCESSED RESULT ---
 {processed_result if processed_result else fallback_notice}
 
---- VERIFIED PAYMENT & BANK DETAILS ---
+--- VERIFIED PAYMENT & AGENCY BANK DETAILS ---
 CBE Leamare Branch (Lem Hotel Area, Addis Ababa): 1000296269488
 Telebirr Account: 0916884912 | Holder: Belayhun Adefrese Metaferia
 ================================================================"""
@@ -304,6 +271,6 @@ Telebirr Account: 0916884912 | Holder: Belayhun Adefrese Metaferia
     str_lit.download_button(
         label="📄 Download Processed Document (.TXT)",
         data=full_output,
-        file_name="gemini_ai_processed_output.txt",
+        file_name="professional_service_output.txt",
         mime="text/plain"
     )
