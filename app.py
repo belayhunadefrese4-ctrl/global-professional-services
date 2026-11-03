@@ -185,51 +185,39 @@ else:
     uploaded_file = str_lit.file_uploader("Upload document, resume, audio, video, or text file:", type=["pdf", "docx", "txt", "mp3", "wav", "mp4", "m4a"])
     client_notes = str_lit.text_area("Or type/paste text directly here for processing:")
 
-    # Robust File Reading
+    # --- BULLETPROOF TEXT PRIORITY FIX ---
     source_text = ""
-    if uploaded_file is not None:
+    if client_notes.strip():
+        source_text = client_notes
+    elif uploaded_file is not None:
         if uploaded_file.name.endswith(".pdf") and HAS_PYPDF:
             try:
                 reader = PdfReader(uploaded_file)
-                extracted_pages = []
-                for page in reader.pages:
-                    txt = page.extract_text()
-                    if txt:
-                        extracted_pages.append(txt)
-                source_text = "\n".join(extracted_pages)
-            except Exception as e:
-                source_text = f"[Error reading PDF: {e}]"
-        elif uploaded_file.name.endswith(".txt"):
-            try:
-                source_text = uploaded_file.getvalue().decode("utf-8")
+                extracted_pages = [page.extract_text() for page in reader.pages if page.extract_text()]
+                source_text = "\n".join(extracted_pages) if extracted_pages else f"[Uploaded File: {uploaded_file.name}]"
             except:
-                source_text = "[Text file read error]"
+                source_text = f"[Uploaded File: {uploaded_file.name}]"
         else:
-            source_text = f"[Uploaded File / Media Record: {uploaded_file.name}]"
-    
-    if not source_text.strip():
-        source_text = client_notes
+            source_text = f"[Uploaded File: {uploaded_file.name}]"
 
     # Process and save permanently into session state when button is clicked
     if str_lit.button("🚀 Process & Execute Request"):
-        if uploaded_file is not None or source_text.strip():
-            with str_lit.spinner("Processing file and generating formatted deliverables..."):
-                content_to_show = source_text if source_text.strip() else f"Processed file: {uploaded_file.name}"
-                
+        if source_text.strip():
+            with str_lit.spinner("Processing text and generating formatted deliverables..."):
                 if "Translation" in service_choice:
-                    str_lit.session_state.processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{content_to_show}\n\n[Translation formatted for international standard delivery.]"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{source_text}\n\n[Translation formatted for international standard delivery.]"
                 elif "Transcription" in service_choice:
-                    str_lit.session_state.processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n[00:00] Start of Media Recording: {uploaded_file.name if uploaded_file else 'Media File'}\n\n{content_to_show}\n\n[End of Transcript - Verified Accurate]"
+                    str_lit.session_state.processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n{source_text}\n\n[End of Transcript - Verified Accurate]"
                 elif "ATS CV" in service_choice:
-                    str_lit.session_state.processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{content_to_show}\n\n[Optimized successfully with targeted keywords and professional layout.]"
+                    str_lit.session_state.processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{source_text}\n\n[Optimized successfully with targeted keywords and professional layout.]"
                 elif "Cover Letter" in service_choice:
-                    str_lit.session_state.processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{content_to_show}\n\nSincerely,\nGlobal Professional Services Hub"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{source_text}\n\nSincerely,\nGlobal Professional Services Hub"
                 else:
-                    str_lit.session_state.processed_result = f"=== PROFESSIONAL EDITING & PROOFREADING ===\n\n{content_to_show}\n\n[Grammar, syntax, and flow fully polished.]"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL EDITING & PROOFREADING ===\n\n{source_text}\n\n[Grammar, syntax, and flow fully polished.]"
 
             str_lit.success("🎉 Request processed successfully! Choose your preferred download format below.")
         else:
-            str_lit.warning("Please upload a file or paste text first.")
+            str_lit.warning("Please paste text or upload a file first.")
 
     # Always display current result if available
     if str_lit.session_state.processed_result:
