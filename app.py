@@ -16,32 +16,52 @@ except ImportError:
 
 st.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
+# Custom Burgundy Brand Styling & UI
 st.markdown("""
     <style>
     .main-header {
         font-size: 38px;
-        background: linear-gradient(90deg, #1E3A8A, #2563EB, #06B6D4);
+        background: linear-gradient(90deg, #800020, #A52A2A, #581845);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
         text-align: center;
         padding-top: 10px;
     }
+    .sub-text {
+        font-size: 17px;
+        color: #4A4A4A;
+        text-align: center;
+        font-weight: 500;
+        margin-bottom: 25px;
+    }
     .free-badge {
-        background-color: #DEF7EC;
-        color: #03543F;
+        background-color: #FDF2F4;
+        color: #800020;
         padding: 4px 10px;
         border-radius: 5px;
         font-weight: bold;
+        border: 1px solid #F5C6CB;
+    }
+    .stButton>button {
+        background-color: #800020;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        background-color: #581845;
+        color: white;
     }
     </style>
 """, unsafe_allow_html=True)
 
+# App Header
 st.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #374151;'>Automated Audio Transcription, Translation, Proofreading & ATS CV Generation</p>", unsafe_allow_html=True)
+st.markdown('<p class="sub-text">Automated Audio Transcription, Translation, Proofreading & ATS CV Generation</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-# Admin Authentication
+# --- ADMIN AUTHENTICATION SECURITY ---
 st.sidebar.header("🔐 Admin Access Portal")
 admin_passcode = st.sidebar.text_input("Enter Admin Passcode:", type="password")
 is_admin = (admin_passcode == "admin123")
@@ -50,6 +70,29 @@ if is_admin:
     st.sidebar.success("🔓 Admin Mode Active: Free Unlimited Access Granted!")
 
 st.sidebar.markdown("---")
+
+# --- CURRENCY ALTERNATIVE SELECTOR ---
+st.sidebar.header("💱 Currency Converter")
+currency_choice = st.sidebar.selectbox(
+    "Select Display Currency:",
+    ["USD ($)", "ETB (Ethiopian Birr)", "EUR (€)", "GBP (£)"]
+)
+
+# Currency conversion rates & symbols relative to USD base
+CURRENCY_RATES = {
+    "USD ($)": {"symbol": "$", "rate": 1.0},
+    "ETB (Ethiopian Birr)": {"symbol": "ETB ", "rate": 57.0}, # Adjustable exchange rate baseline
+    "EUR (€)": {"symbol": "€", "rate": 0.92},
+    "GBP (£)": {"symbol": "£", "rate": 0.79}
+}
+
+curr_info = CURRENCY_RATES[currency_choice]
+curr_sym = curr_info["symbol"]
+curr_rate = curr_info["rate"]
+
+st.sidebar.markdown("---")
+
+# Sidebar Navigation
 st.sidebar.header("📂 Select a Service")
 service_choice = st.sidebar.selectbox(
     "Choose what you need:",
@@ -87,8 +130,9 @@ if service_choice == "⚙️ Admin Dashboard":
         st.markdown('<span class="free-badge">ADMIN ACCESS UNLOCKED</span>', unsafe_allow_html=True)
         st.markdown("""
         * **Status:** Operational
-        * **Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
-        * **CBE:** `1000296269488` (Leamare Branch, Lem Hotel Area, Addis Ababa)
+        * **Active Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
+        * **Active CBE Account:** `1000296269488` (Leamare Branch, Lem Hotel Area, Addis Ababa)
+        * **International Remittance:** Remitly, Wave, WorldRemit, Payoneer USD
         """)
     else:
         st.error("🔒 Enter the correct Admin Passcode in the sidebar.")
@@ -106,27 +150,37 @@ else:
             
         st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 2 Pages FREE!</span>", unsafe_allow_html=True)
         page_count = st.number_input("Document Pages:", min_value=1, value=3)
-        billable = max(0, page_count - 2) if not is_admin else 0
-        st.info(f"Total Cost: ${billable * 0.25:.2f} USD / {billable * 1.0:.2f} ETB")
+        
+        base_usd = max(0, page_count - 2) * 0.25 if not is_admin else 0.0
+        final_price = base_usd * curr_rate
+        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
     elif "Transcription" in service_choice:
         st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 10 Minutes FREE!</span>", unsafe_allow_html=True)
         duration_mins = st.number_input("Audio Duration (mins):", min_value=1, value=15)
-        billable = max(0, duration_mins - 10) if not is_admin else 0
-        st.info(f"Total Cost: ${billable * 0.25:.2f} USD / {billable * 1.0:.2f} ETB")
+        
+        base_usd = max(0, duration_mins - 10) * 0.25 if not is_admin else 0.0
+        final_price = base_usd * curr_rate
+        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+
     elif "ATS CV" in service_choice:
         cv_count = st.number_input("Number of CVs:", min_value=1, value=1)
-        cost = cv_count * 2.0 if not is_admin else 0
-        st.info(f"Total Cost: ${cost:.2f} USD")
+        base_usd = cv_count * 2.0 if not is_admin else 0.0
+        final_price = base_usd * curr_rate
+        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+
     elif "Cover Letter" in service_choice:
         letter_count = st.number_input("Number of Letters:", min_value=1, value=1)
-        cost = letter_count * 1.0 if not is_admin else 0
-        st.info(f"Total Cost: ${cost:.2f} USD")
+        base_usd = letter_count * 1.0 if not is_admin else 0.0
+        final_price = base_usd * curr_rate
+        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+
     else:
         word_count = st.number_input("Word Count:", min_value=100, value=500, step=100)
         blocks = (word_count // 500) + (1 if word_count % 500 > 0 else 0)
-        cost = blocks * 0.25 if not is_admin else 0
-        st.info(f"Total Cost: ${cost:.2f} USD")
+        base_usd = blocks * 0.25 if not is_admin else 0.0
+        final_price = base_usd * curr_rate
+        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
     st.markdown("---")
     st.subheader("📁 Upload Your Files or Details")
@@ -169,6 +223,40 @@ else:
             st.success("🎉 Translation & processing completed successfully!")
         else:
             st.warning("Please upload a document or paste text to translate.")
+
+    st.markdown("---")
+
+    # Payment Gateway (Skipped if Admin)
+    if not is_admin:
+        st.subheader("💳 Secure Payment Options")
+        st.markdown("Choose your preferred payment channel below to finalize your service order.")
+        tab1, tab2 = st.tabs(["🌍 International Payer Options", "🏠 Local Ethiopian Payment (Telebirr & CBE)"])
+
+        with tab1:
+            st.markdown("### International Payer Channels")
+            st.markdown("""
+            * **Payoneer USD Receiving Account:** *(Pending compliance review activation)*
+            * **Alternative Remittance Services:** Send funds directly via **Remitly**, **Wave**, or **WorldRemit** to local CBE bank details or mobile.
+            * **Account Name:** Belayhun Adefrese Metaferia
+            """)
+
+        with tab2:
+            st.markdown("### Local Bank & Mobile Transfer")
+            st.markdown("""
+            * **📱 Telebirr:** `0916884912` (Name: Belayhun Adefrese Metaferia)
+            * **🏦 Commercial Bank of Ethiopia (CBE):** 
+              * **Account Number:** `1000296269488`
+              * **Branch Name:** Leamare Branch (Lem Hotel Area, Addis Ababa)
+              * **Account Holder:** Belayhun Adefrese Metaferia
+            """)
+            st.text_input("Paste Transaction Reference Code (Receipt Code):")
+            st.file_uploader("Upload payment receipt screenshot:", type=["jpg", "png", "jpeg"], key="receipt_upload")
+
+        if st.button("✅ Confirm Payment & Queue Processing"):
+            st.balloons()
+            st.success("Payment submitted! Your request is now queued for automated processing.")
+    else:
+        st.info("💡 **Admin Notice:** Payment gateway is bypassed because Admin Mode is active.")
 
     st.markdown("---")
     st.subheader("📥 Download Completed Files")
