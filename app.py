@@ -7,7 +7,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom Brand Styling (Larger, Attractive Gradient Header & Clean UI)
+# Custom Brand Styling
 st.markdown("""
     <style>
     .main-header {
@@ -38,13 +38,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# App Header (Enlarged & Attractive)
+# App Header
 st.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">Automated Audio Transcription, Translation, Proofreading & ATS CV/Cover Letter Generation</p>', unsafe_allow_html=True)
 
 st.markdown("---")
 
-# Sidebar for Service Selection with Icons & Admin Mode
+# Sidebar Navigation
 st.sidebar.header("📂 Select a Service")
 service_choice = st.sidebar.selectbox(
     "Choose what you need:",
@@ -58,65 +58,97 @@ service_choice = st.sidebar.selectbox(
     ]
 )
 
-# Service Calculator & Pricing
+# Admin Panel Option
 if service_choice == "⚙️ Admin Dashboard (Always Free)":
     st.subheader("⚙️ Platform Admin Panel")
     st.markdown('<span class="free-badge">ALWAYS FREE ADMIN ACCESS</span>', unsafe_allow_html=True)
     st.markdown("""
     Welcome to your management dashboard! Here you can monitor incoming orders, review uploaded client files, and manage processing queues.
     * **System Status:** Online & Fully Operational
-    * **Total Active Orders:** 0 Pending
-    * **Revenue Tracking:** Integrated with Telebirr (`0916884912`) & CBE (`1000296269488`)
+    * **Active Telebirr Account:** `0916884912`
+    * **Active CBE Account:** `1000296269488` (Leamare Branch)
     """)
-    st.info("As platform administrator, all testing and system checks are 100% free.")
+    st.info("As platform administrator, all system actions and file downloads are 100% free.")
 
 else:
     st.subheader(f"Service: {service_choice}")
 
+    # Language Selection Feature (Local + Global)
+    ETHIOPIAN_LANGUAGES = [
+        "🇪🇹 Amharic (አማርኛ)",
+        "🇪🇹 Afaan Oromoo (Oromiffa)",
+        "🇪🇹 Tigrinya (ትግርኛ)",
+        "🇪🇹 Somali (Soomaali)",
+        "🇪🇹 Sidama (Afaan Oromoo)",
+        "🇪🇹 Wolaytta",
+        "🇪🇹 Gurage"
+    ]
+
+    GLOBAL_LANGUAGES = [
+        "🇺🇸/🇬🇧 English (US/UK)",
+        "🇸🇦 Arabic (العربية)",
+        "🇫🇷 French (Français)",
+        "🇨🇳 Mandarin Chinese (中文)",
+        "🇪🇸 Spanish (Español)",
+        "🇩🇪 German (Deutsch)",
+        "🇮🇹 Italian (Italiano)"
+    ]
+
+    ALL_LANGUAGES = ["✨ Auto-Detect Language"] + ETHIOPIAN_LANGUAGES + GLOBAL_LANGUAGES
+
+    # Service Pricing Logic
     if "Transcription" in service_choice:
         st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 10 Minutes FREE!</span>", unsafe_allow_html=True)
-        st.markdown("**Rate:** Minimum **$0.25 USD** (or **1 ETB**) per minute after your first 10 free minutes.")
-        duration_mins = st.number_input("Enter Audio Duration (in minutes):", min_value=1, value=15)
         
+        # Audio Source Language Selector
+        source_lang = st.selectbox("🎙️ Audio Source Language:", ALL_LANGUAGES)
+        
+        duration_mins = st.number_input("Enter Audio Duration (in minutes):", min_value=1, value=15)
         billable_mins = max(0, duration_mins - 10)
         total_usd = billable_mins * 0.25
         total_etb = billable_mins * 1.0
         
         if duration_mins <= 10:
-            st.success("✨ Your audio duration is within the 10-minute FREE trial tier! Total Cost: $0.00 USD / 0.00 ETB")
+            st.success("✨ FREE Tier Applied! Total Cost: $0.00 USD / 0.00 ETB")
         else:
             st.info(f"**Billed Minutes (after 10 free mins):** {billable_mins} mins | **Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     elif "Translation" in service_choice:
         st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 2 Pages FREE!</span>", unsafe_allow_html=True)
-        st.markdown("**Rate:** **$0.25 USD** (or **1 ETB**) per page after your first 2 free pages.")
-        page_count = st.number_input("Enter Document Page Count:", min_value=1, value=3)
         
+        # Source and Target Language Selection
+        col_lang1, col_lang2 = st.columns(2)
+        with col_lang1:
+            source_lang = st.selectbox("📄 Translate From (Source Language):", ALL_LANGUAGES, index=0)
+        with col_lang2:
+            target_lang = st.selectbox("🎯 Translate To (Target Language):", ETHIOPIAN_LANGUAGES + GLOBAL_LANGUAGES, index=0)
+
+        page_count = st.number_input("Enter Document Page Count:", min_value=1, value=3)
         billable_pages = max(0, page_count - 2)
         total_usd = billable_pages * 0.25
         total_etb = billable_pages * 1.0
         
         if page_count <= 2:
-            st.success("✨ Your document page count is within the 2-page FREE trial tier! Total Cost: $0.00 USD / 0.00 ETB")
+            st.success("✨ FREE Tier Applied! Total Cost: $0.00 USD / 0.00 ETB")
         else:
             st.info(f"**Billed Pages (after 2 free pages):** {billable_pages} pages | **Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     elif "ATS CV" in service_choice:
-        st.markdown("**Rate:** Fixed Tier — Minimum **$2.00 USD** or **10 ETB** per document.")
+        cv_lang = st.selectbox("🌐 Target Resume Language:", ["🇺🇸 English (Standard)", "🇪🇹 Amharic (አማርኛ)", "🇫🇷 French (Français)", "🇸🇦 Arabic (العربية)"])
         cv_count = st.number_input("Number of CVs to generate/rewrite:", min_value=1, value=1)
         total_usd = cv_count * 2.00
         total_etb = cv_count * 10.0
         st.info(f"**Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     elif "Cover Letter" in service_choice:
-        st.markdown("**Rate:** Fixed Tier — Minimum **$1.00 USD** or **5 ETB** per letter.")
+        letter_lang = st.selectbox("🌐 Target Cover Letter Language:", ["🇺🇸 English (Standard)", "🇪🇹 Amharic (አማርኛ)", "🇫🇷 French (Français)", "🇸🇦 Arabic (العربية)"])
         letter_count = st.number_input("Number of Cover Letters to generate:", min_value=1, value=1)
         total_usd = letter_count * 1.00
         total_etb = letter_count * 5.0
         st.info(f"**Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     else:  # Proofreading
-        st.markdown("**Rate:** **$0.25 USD** (or **1 ETB**) per 500 words.")
+        proof_lang = st.selectbox("✍️ Text Language:", ALL_LANGUAGES)
         word_count = st.number_input("Enter Word Count:", min_value=100, value=500, step=100)
         blocks = (word_count // 500) + (1 if word_count % 500 > 0 else 0)
         total_usd = blocks * 0.25
@@ -128,11 +160,11 @@ else:
     # File Upload Section
     st.subheader("📁 Upload Your Files or Details")
     uploaded_file = st.file_uploader("Upload document, resume draft, audio, or instructions:", type=["pdf", "docx", "txt", "mp3", "wav", "mp4"])
-    client_notes = st.text_area("Provide target job description, specific instructions, or target language:")
+    client_notes = st.text_area("Provide target job description, specific instructions, or formatting preferences:")
 
-    if st.button("Submit Order Request"):
+    if st.button("🚀 Submit Order Request"):
         if uploaded_file is not None or client_notes.strip() != "":
-            st.success("Details uploaded successfully! Please complete your payment below if applicable.")
+            st.success("Details uploaded successfully! Please proceed to payment below if applicable.")
         else:
             st.warning("Please upload a file or enter instructions before submitting your order.")
 
@@ -148,7 +180,7 @@ else:
         st.markdown("### International Payer Channels")
         st.markdown("""
         * **Payoneer USD Receiving Account:** *(Pending compliance review activation)*
-        * **Alternative Remittance Services:** International payers can easily send funds directly using **Remitly**, **Wave**, or **WorldRemit** linked to your local CBE account or mobile details.
+        * **Alternative Remittance Services:** Send funds directly via **Remitly**, **Wave**, or **WorldRemit** to local CBE bank details or mobile.
         * **Account Name:** Belayhun Adefrese Metaferia
         """)
 
@@ -164,19 +196,6 @@ else:
         st.text_input("Paste Transaction Reference Code (Receipt Code):")
         st.file_uploader("Upload payment receipt screenshot:", type=["jpg", "png", "jpeg"], key="receipt_upload")
 
-    if st.button("Confirm Payment & Queue Processing"):
+    if st.button("✅ Confirm Payment & Queue Processing"):
         st.balloons()
-        st.success("Payment submitted! Your request is now queued for processing.")
-
-    st.markdown("---")
-
-    # Download Section for Completed Deliverables
-    st.subheader("📥 Download Completed Files")
-    st.markdown("Once your audio transcription, translated document, or ATS CV is ready, download it securely below using the download icon button.")
-
-    st.download_button(
-        label="⬇️ Download Completed Result (Sample File)",
-        data="Sample processed text output from Global Professional Services Hub.",
-        file_name="completed_professional_service.txt",
-        mime="text/plain"
-    )
+        st.success
