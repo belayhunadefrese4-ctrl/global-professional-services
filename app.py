@@ -116,7 +116,7 @@ service_choice = str_lit.sidebar.selectbox(
     ]
 )
 
-# Language Mapping List
+# Language Mapping List (English First, then Ethiopian & Global)
 LANG_OPTIONS = [
     "🇺🇸/🇬🇧 English",
     "🇪🇹 Amharic (አማርኛ)",
@@ -192,17 +192,25 @@ else:
     uploaded_file = str_lit.file_uploader("Upload document, resume, or text file:", type=["pdf", "docx", "txt"])
     client_notes = str_lit.text_area("Or type/paste text directly here for AI processing:")
 
+    # --- ROBUST PDF TEXT EXTRACTION FIX ---
     source_text = ""
     if uploaded_file is not None:
         if uploaded_file.name.endswith(".pdf") and HAS_PYPDF:
             try:
                 reader = PdfReader(uploaded_file)
+                extracted_pages = []
                 for page in reader.pages:
                     txt = page.extract_text()
                     if txt:
-                        source_text += txt + "\n"
+                        extracted_pages.append(txt)
+                source_text = "\n".join(extracted_pages)
             except Exception as e:
                 source_text = f"[Error reading PDF: {e}]"
+        elif uploaded_file.name.endswith(".txt"):
+            try:
+                source_text = uploaded_file.getvalue().decode("utf-8")
+            except:
+                source_text = "[Text file read error]"
         else:
             source_text = f"[Uploaded File: {uploaded_file.name}]"
     
@@ -213,7 +221,7 @@ else:
     
     if str_lit.button("🚀 Process & Translate with Gemini AI"):
         if uploaded_file is not None or source_text.strip():
-            with str_lit.spinner("🤖 Gemini AI is actively processing and translating your content..."):
+            with str_lit.spinner("🤖 Gemini AI is actively reading, processing, and translating your content..."):
                 try:
                     api_key = str_lit.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
                     text_to_process = source_text if source_text.strip() else f"Process uploaded file: {uploaded_file.name}"
@@ -221,17 +229,15 @@ else:
                     if not api_key and HAS_GEMINI:
                         processed_result = f"[Warning: GEMINI_API_KEY not configured in secrets]\n\n{text_to_process}"
                     elif HAS_GEMINI:
-                        # Correct official Google GenAI SDK Client Initialization
                         client = genai.Client(api_key=api_key)
                         
                         if "Translation" in service_choice:
-                            prompt = f"Act as an expert professional translator and localization specialist. Provide a contextually smooth, highly polished, and accurate translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{text_to_process[:5000]}"
+                            prompt = f"Act as an expert professional translator and localization specialist. Provide a contextually smooth, highly polished, and accurate translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{text_to_process[:8000]}"
                         elif "ATS CV" in service_choice:
-                            prompt = f"Act as an expert career strategist and ATS specialist. Rewrite, optimize, and format the following CV text for high ATS ranking and professional presentation:\n\n{text_to_process[:5000]}"
+                            prompt = f"Act as an expert career strategist and ATS specialist. Rewrite, optimize, and format the following CV text for high ATS ranking and professional presentation:\n\n{text_to_process[:8000]}"
                         else:
-                            prompt = f"Act as an expert editor. Thoroughly proofread, polish, and enhance the following text professionally:\n\n{text_to_process[:5000]}"
+                            prompt = f"Act as an expert editor. Thoroughly proofread, polish, and enhance the following text professionally:\n\n{text_to_process[:8000]}"
 
-                        # Correct method call for Google GenAI SDK
                         response = client.models.generate_content(
                             model="gemini-2.5-flash",
                             contents=prompt
