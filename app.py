@@ -140,7 +140,7 @@ if service_choice == "⚙️ Admin Dashboard":
     str_lit.subheader("⚙️ Platform Admin Panel")
     if is_admin:
         str_lit.markdown("""
-        * **Status:** Fully Operational with Live Gemini AI Engine
+        * **Status:** Fully Operational with Live Gemini 1.5 Flash AI Engine
         * **Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
         * **CBE Account:** `1000296269488` (Leamare Branch, Addis Ababa)
         """)
@@ -213,7 +213,7 @@ else:
                         elif "Transcription" in service_choice:
                             prompt = f"Clean up, format, and structure the following raw transcript into professional, accurate paragraphs:\n\n{final_input_text}"
                         elif "ATS CV" in service_choice:
-                            prompt = f"Optimize the following resume text for ATS (Applicant Tracking Systems) with strong professional bullet points and keywords:\n\n{final_input_text}"
+                            prompt = f"Optimize the following resume text for ATS (Applicant Tracking Systems) with strong professional bullet points, keyword optimization, and executive formatting:\n\n{final_input_text}"
                         elif "Cover Letter" in service_choice:
                             prompt = f"Write a compelling, professional executive cover letter based on these details:\n\n{final_input_text}"
                         else:
