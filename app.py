@@ -204,19 +204,16 @@ else:
 
     processed_result = ""
     
-    # Process with Gemini AI when button is clicked
     if str_lit.button("🚀 Process & Translate with Gemini AI"):
         if source_text.strip():
             with str_lit.spinner("Connecting to Gemini AI for professional contextual processing..."):
                 try:
-                    # Initialize Gemini client using Streamlit secrets or environment variables
                     api_key = str_lit.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
                     if not api_key and HAS_GEMINI:
-                        processed_result = source_text # Fallback if key isn't entered yet
+                        processed_result = source_text
                     elif HAS_GEMINI:
                         client = genai.Client(api_key=api_key)
                         
-                        # Build professional prompt based on service
                         if "Translation" in service_choice:
                             prompt = f"Act as an expert professional translator. Provide a contextually smooth, highly polished translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{source_text[:5000]}"
                         elif "ATS CV" in service_choice:
@@ -273,9 +270,22 @@ else:
     str_lit.markdown("---")
     str_lit.subheader("📥 Download Completed Files")
 
+    fallback_notice = 'Click Process & Translate with Gemini AI above.'
     full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - GEMINI AI OUTPUT ===
 Service: {service_choice}
 Source File: {uploaded_file.name if uploaded_file else 'Direct Text Input'}
 
 --- AI PROCESSED RESULT ---
-{processed_result if processed_result else 'Click "Process & Translate with Gemini AI" above
+{processed_result if processed_result else fallback_notice}
+
+--- VERIFIED PAYMENT & BANK DETAILS ---
+CBE Leamare Branch (Lem Hotel Area, Addis Ababa): 1000296269488
+Telebirr Account: 0916884912 | Holder: Belayhun Adefrese Metaferia
+================================================================"""
+
+    str_lit.download_button(
+        label="📄 Download Processed Document (.TXT)",
+        data=full_output,
+        file_name="gemini_processed_output.txt",
+        mime="text/plain"
+    )
