@@ -73,19 +73,20 @@ if service_choice == "⚙️ Admin Dashboard (Always Free)":
 else:
     st.subheader(f"Service: {service_choice}")
 
-    # Language Selection Feature (Local + Global)
+    # Language Lists with English First
+    ENGLISH_PRIMARY = ["🇺🇸/🇬🇧 English (US/UK)"]
+    
     ETHIOPIAN_LANGUAGES = [
         "🇪🇹 Amharic (አማርኛ)",
         "🇪🇹 Afaan Oromoo (Oromiffa)",
         "🇪🇹 Tigrinya (ትግርኛ)",
         "🇪🇹 Somali (Soomaali)",
-        "🇪🇹 Sidama (Afaan Oromoo)",
+        "🇪🇹 Sidama",
         "🇪🇹 Wolaytta",
         "🇪🇹 Gurage"
     ]
 
     GLOBAL_LANGUAGES = [
-        "🇺🇸/🇬🇧 English (US/UK)",
         "🇸🇦 Arabic (العربية)",
         "🇫🇷 French (Français)",
         "🇨🇳 Mandarin Chinese (中文)",
@@ -94,16 +95,16 @@ else:
         "🇮🇹 Italian (Italiano)"
     ]
 
-    ALL_LANGUAGES = ["✨ Auto-Detect Language"] + ETHIOPIAN_LANGUAGES + GLOBAL_LANGUAGES
+    ALL_LANGUAGES = ["✨ Auto-Detect Language"] + ENGLISH_PRIMARY + ETHIOPIAN_LANGUAGES + GLOBAL_LANGUAGES
+    TARGET_LANG_LIST = ENGLISH_PRIMARY + ETHIOPIAN_LANGUAGES + GLOBAL_LANGUAGES
 
     # Service Pricing Logic
     if "Transcription" in service_choice:
         st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 10 Minutes FREE!</span>", unsafe_allow_html=True)
         
-        # Audio Source Language Selector
-        source_lang = st.selectbox("🎙️ Audio Source Language:", ALL_LANGUAGES)
-        
+        source_lang = st.selectbox("🎙️ Audio Source Language:", ALL_LANGUAGES, index=1) # Default to English
         duration_mins = st.number_input("Enter Audio Duration (in minutes):", min_value=1, value=15)
+        
         billable_mins = max(0, duration_mins - 10)
         total_usd = billable_mins * 0.25
         total_etb = billable_mins * 1.0
@@ -116,12 +117,11 @@ else:
     elif "Translation" in service_choice:
         st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 2 Pages FREE!</span>", unsafe_allow_html=True)
         
-        # Source and Target Language Selection
         col_lang1, col_lang2 = st.columns(2)
         with col_lang1:
-            source_lang = st.selectbox("📄 Translate From (Source Language):", ALL_LANGUAGES, index=0)
+            source_lang = st.selectbox("📄 Translate From (Source Language):", ALL_LANGUAGES, index=1)
         with col_lang2:
-            target_lang = st.selectbox("🎯 Translate To (Target Language):", ETHIOPIAN_LANGUAGES + GLOBAL_LANGUAGES, index=0)
+            target_lang = st.selectbox("🎯 Translate To (Target Language):", TARGET_LANG_LIST, index=0)
 
         page_count = st.number_input("Enter Document Page Count:", min_value=1, value=3)
         billable_pages = max(0, page_count - 2)
@@ -134,21 +134,21 @@ else:
             st.info(f"**Billed Pages (after 2 free pages):** {billable_pages} pages | **Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     elif "ATS CV" in service_choice:
-        cv_lang = st.selectbox("🌐 Target Resume Language:", ["🇺🇸 English (Standard)", "🇪🇹 Amharic (አማርኛ)", "🇫🇷 French (Français)", "🇸🇦 Arabic (العربية)"])
+        cv_lang = st.selectbox("🌐 Target Resume Language:", TARGET_LANG_LIST, index=0)
         cv_count = st.number_input("Number of CVs to generate/rewrite:", min_value=1, value=1)
         total_usd = cv_count * 2.00
         total_etb = cv_count * 10.0
         st.info(f"**Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     elif "Cover Letter" in service_choice:
-        letter_lang = st.selectbox("🌐 Target Cover Letter Language:", ["🇺🇸 English (Standard)", "🇪🇹 Amharic (አማርኛ)", "🇫🇷 French (Français)", "🇸🇦 Arabic (العربية)"])
+        letter_lang = st.selectbox("🌐 Target Cover Letter Language:", TARGET_LANG_LIST, index=0)
         letter_count = st.number_input("Number of Cover Letters to generate:", min_value=1, value=1)
         total_usd = letter_count * 1.00
         total_etb = letter_count * 5.0
         st.info(f"**Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
     else:  # Proofreading
-        proof_lang = st.selectbox("✍️ Text Language:", ALL_LANGUAGES)
+        proof_lang = st.selectbox("✍️ Text Language:", ALL_LANGUAGES, index=1)
         word_count = st.number_input("Enter Word Count:", min_value=100, value=500, step=100)
         blocks = (word_count // 500) + (1 if word_count % 500 > 0 else 0)
         total_usd = blocks * 0.25
@@ -198,4 +198,26 @@ else:
 
     if st.button("✅ Confirm Payment & Queue Processing"):
         st.balloons()
-        st.success
+        st.success("Payment submitted! Your request is now queued for automated processing.")
+
+    st.markdown("---")
+
+    # Download Deliverables Section with Icons
+    st.subheader("📥 Download Completed Files")
+    st.markdown("When processing completes, download your output using the formatted download icons below:")
+
+    col_dl1, col_dl2 = st.columns(2)
+    with col_dl1:
+        st.download_button(
+            label="📄 Download Processed Document (.TXT / .DOCX)",
+            data="Sample translated or proofread document output from Global Professional Services Hub.",
+            file_name="completed_document.txt",
+            mime="text/plain"
+        )
+    with col_dl2:
+        st.download_button(
+            label="🎵 Download Transcription Transcript (.TXT)",
+            data="Sample audio transcription output from Global Professional Services Hub.",
+            file_name="completed_transcription.txt",
+            mime="text/plain"
+        )
