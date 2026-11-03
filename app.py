@@ -82,7 +82,7 @@ if is_admin:
 
 # Gemini API Key configuration input in sidebar for instant live AI power
 str_lit.sidebar.markdown("---")
-str_lit.sidebar.header("⚙️ Gemini 3.8 AI Engine")
+str_lit.sidebar.header("⚙️ Gemini AI Engine")
 gemini_api_key = str_lit.sidebar.text_input("Enter Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
 if gemini_api_key and HAS_GEMINI:
@@ -140,7 +140,7 @@ if service_choice == "⚙️ Admin Dashboard":
     str_lit.subheader("⚙️ Platform Admin Panel")
     if is_admin:
         str_lit.markdown("""
-        * **Status:** Fully Operational with Gemini 3.8 Flash AI Engine
+        * **Status:** Fully Operational with Live Gemini AI Engine
         * **Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
         * **CBE Account:** `1000296269488` (Leamare Branch, Addis Ababa)
         """)
@@ -200,13 +200,12 @@ else:
 
     if str_lit.button("🚀 Process & Generate Deliverable"):
         if final_input_text.strip():
-            with str_lit.spinner("Processing with Gemini 3.8 Flash AI..."):
+            with str_lit.spinner("Processing with Live Gemini AI Engine..."):
                 ai_output = ""
                 
                 if ai_configured:
                     try:
-                        # Explicitly target Gemini 3.8 Flash for peak intelligence and speed
-                        model = genai.GenerativeModel("gemini-3.8-flash")
+                        model = genai.GenerativeModel("gemini-1.5-flash")
                         
                         if "Translation" in service_choice:
                             prompt = f"Translate the following text accurately and professionally from {src_lang_name} to {tgt_lang_name}. Provide only the clean, high-quality translation output:\n\n{final_input_text}"
@@ -222,15 +221,15 @@ else:
                         response = model.generate_content(prompt)
                         ai_output = response.text
                     except Exception as e:
-                        ai_output = f"[Gemini 3.8 Processing Error: {e}]\n\n{final_input_text}"
+                        ai_output = f"[Gemini processing error: {e}]\n\n{final_input_text}"
 
                 if not ai_output:
                     ai_output = f"=== PROCESSED OUTPUT ===\n\n{final_input_text}"
 
                 if "Translation" in service_choice:
-                    str_lit.session_state.processed_result = f"=== PROFESSIONAL GEMINI 3.8 TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{ai_output}\n\n[Verified by Global Professional Services Hub]"
+                    str_lit.session_state.processed_result = f"=== PROFESSIONAL GEMINI AI TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{ai_output}\n\n[Verified by Global Professional Services Hub]"
                 elif "Transcription" in service_choice:
-                    str_lit.session_state.processed_result = f"=== GEMINI 3.8 AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n{ai_output}\n\n[Transcript verified accurate]"
+                    str_lit.session_state.processed_result = f"=== GEMINI AI AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n{ai_output}\n\n[Transcript verified accurate]"
                 elif "ATS CV" in service_choice:
                     str_lit.session_state.processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{ai_output}\n\n[Optimized for executive recruitment]"
                 elif "Cover Letter" in service_choice:
