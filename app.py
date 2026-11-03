@@ -7,30 +7,30 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom Brand Styling (Attractive Colors & Clean Header)
+# Custom Brand Styling (Larger, Attractive Gradient Header & Clean UI)
 st.markdown("""
     <style>
     .main-header {
-        font-size: 32px;
-        color: #1E3A8A;
-        font-weight: bold;
+        font-size: 38px;
+        background: linear-gradient(90deg, #1E3A8A, #2563EB, #06B6D4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
         text-align: center;
+        padding-top: 10px;
+        padding-bottom: 5px;
     }
     .sub-text {
-        font-size: 16px;
-        color: #4B5563;
+        font-size: 17px;
+        color: #374151;
         text-align: center;
-    }
-    .box-card {
-        background-color: #F3F4F6;
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 5px solid #2563EB;
+        font-weight: 500;
+        margin-bottom: 25px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# App Header
+# App Header (Enlarged & Attractive)
 st.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">Automated Audio Transcription, Translation, Proofreading & ATS CV/Cover Letter Generation</p>', unsafe_allow_html=True)
 
@@ -139,7 +139,6 @@ st.markdown("---")
 st.subheader("📥 Download Completed Files")
 st.markdown("Once your audio transcription, translated document, or ATS CV is ready, download it securely below using the download button.")
 
-# Simulated dummy download item for user experience
 st.download_button(
     label="⬇️ Download Completed Result (Sample File)",
     data="Sample processed text output from Global Professional Services Hub.",
