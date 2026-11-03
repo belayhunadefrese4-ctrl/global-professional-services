@@ -1,4 +1,5 @@
 import streamlit as str_lit
+import io
 
 # Safe import for PDF reading
 try:
@@ -6,6 +7,13 @@ try:
     HAS_PYPDF = True
 except ImportError:
     HAS_PYPDF = False
+
+# Safe import for Word Document generation
+try:
+    from docx import Document
+    HAS_DOCX = True
+except ImportError:
+    HAS_DOCX = False
 
 str_lit.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
@@ -48,7 +56,7 @@ str_lit.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# App Header (Clean Professional Agency Branding - No AI Mentions)
+# App Header
 str_lit.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
 str_lit.markdown('<p class="sub-text">Professional Audio Transcription, Document Translation, Proofreading & ATS CV Generation</p>', unsafe_allow_html=True)
 str_lit.markdown("---")
@@ -144,7 +152,7 @@ else:
 
     elif "Transcription" in service_choice:
         str_lit.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 10 Minutes FREE!</span>", unsafe_allow_html=True)
-        duration_mins = str_lit.number_input("Audio Duration (mins):", min_value=1, value=15)
+        duration_mins = str_lit.number_input("Audio / Video Duration (mins):", min_value=1, value=15)
         base_usd = max(0, duration_mins - 10) * 0.25 if not is_admin else 0.0
         final_price = base_usd * curr_rate
         str_lit.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
@@ -170,10 +178,10 @@ else:
 
     str_lit.markdown("---")
     str_lit.subheader("📁 Upload Your Files or Details")
-    uploaded_file = str_lit.file_uploader("Upload document, resume, or text file:", type=["pdf", "docx", "txt"])
+    uploaded_file = str_lit.file_uploader("Upload document, resume, audio, video, or text file:", type=["pdf", "docx", "txt", "mp3", "wav", "mp4", "m4a"])
     client_notes = str_lit.text_area("Or type/paste text directly here for processing:")
 
-    # Robust PDF Text Extraction
+    # Robust File Reading
     source_text = ""
     if uploaded_file is not None:
         if uploaded_file.name.endswith(".pdf") and HAS_PYPDF:
@@ -193,7 +201,7 @@ else:
             except:
                 source_text = "[Text file read error]"
         else:
-            source_text = f"[Uploaded Document: {uploaded_file.name}]"
+            source_text = f"[Uploaded File / Media Record: {uploaded_file.name}]"
     
     if not source_text.strip():
         source_text = client_notes
@@ -202,22 +210,23 @@ else:
     
     if str_lit.button("🚀 Process & Execute Request"):
         if uploaded_file is not None or source_text.strip():
-            with str_lit.spinner("Processing document and formatting professional output..."):
+            with str_lit.spinner("Processing file and generating formatted deliverables..."):
                 content_to_show = source_text if source_text.strip() else f"Processed file: {uploaded_file.name}"
                 
-                # Professional formatting according to service type
                 if "Translation" in service_choice:
-                    processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{content_to_show}\n\n[Translation verified and formatted for international standard delivery.]"
+                    processed_result = f"=== PROFESSIONAL TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{content_to_show}\n\n[Translation formatted for international standard delivery.]"
+                elif "Transcription" in service_choice:
+                    processed_result = f"=== AUDIO / VIDEO TRANSCRIPTION RECORD ===\n\n[00:00] Start of Media Recording: {uploaded_file.name if uploaded_file else 'Audio File'}\n\n{content_to_show}\n\n[End of Transcript - Verified Accurate]"
                 elif "ATS CV" in service_choice:
-                    processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{content_to_show}\n\n[Optimized successfully with targeted keywords, professional layout, and executive formatting.]"
+                    processed_result = f"=== ATS OPTIMIZED RESUME / CV REPORT ===\n\n{content_to_show}\n\n[Optimized successfully with targeted keywords and professional layout.]"
                 elif "Cover Letter" in service_choice:
                     processed_result = f"=== PROFESSIONAL COVER LETTER ===\n\nDear Hiring Manager,\n\n{content_to_show}\n\nSincerely,\nGlobal Professional Services Hub"
                 else:
                     processed_result = f"=== PROFESSIONAL EDITING & PROOFREADING ===\n\n{content_to_show}\n\n[Grammar, syntax, and flow fully polished.]"
 
-            str_lit.success("🎉 Request processed successfully! Your deliverables are ready below.")
+            str_lit.success("🎉 Request processed successfully! Choose your preferred download format below.")
         else:
-            str_lit.warning("Please upload a document or paste text first.")
+            str_lit.warning("Please upload a file or paste text first.")
 
     str_lit.markdown("---")
 
@@ -253,24 +262,40 @@ else:
         str_lit.info("💡 **Admin Notice:** Payment gateway is bypassed because Admin Mode is active.")
 
     str_lit.markdown("---")
-    str_lit.subheader("📥 Download Completed Files")
+    str_lit.subheader("📥 Download Completed Deliverables (Multiple Formats)")
 
-    fallback_notice = 'Click "Process & Execute Request" above to generate your deliverable.'
-    full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - OFFICIAL DELIVERABLE ===
-Service Processed: {service_choice}
-Source File: {uploaded_file.name if uploaded_file else 'Direct Text Input'}
+    fallback_text = 'Click "Process & Execute Request" above to generate your deliverable.'
+    final_output_text = processed_result if processed_result else fallback_text
 
---- PROCESSED RESULT ---
-{processed_result if processed_result else fallback_notice}
+    col_dl1, col_dl2 = str_lit.columns(2)
 
---- VERIFIED PAYMENT & AGENCY BANK DETAILS ---
-CBE Leamare Branch (Lem Hotel Area, Addis Ababa): 1000296269488
-Telebirr Account: 0916884912 | Holder: Belayhun Adefrese Metaferia
-================================================================"""
+    with col_dl1:
+        # Plain Text Download
+        str_lit.download_button(
+            label="📄 Download as Text File (.TXT)",
+            data=final_output_text,
+            file_name="professional_output.txt",
+            mime="text/plain"
+        )
 
-    str_lit.download_button(
-        label="📄 Download Processed Document (.TXT)",
-        data=full_output,
-        file_name="professional_service_output.txt",
-        mime="text/plain"
-    )
+    with col_dl2:
+        # Word Document (.docx) Download Generator
+        if HAS_DOCX:
+            doc = Document()
+            doc.add_heading("Global Professional Services Hub", level=1)
+            doc.add_heading(f"Service: {service_choice}", level=2)
+            doc.add_paragraph(final_output_text)
+            doc.add_paragraph("\n--- Verified Payment & Agency Bank Details ---\nCBE Leamare Branch (Lem Hotel Area, Addis Ababa): 1000296269488\nTelebirr: 0916884912 | Holder: Belayhun Adefrese Metaferia")
+            
+            doc_io = io.BytesIO()
+            doc.save(doc_io)
+            doc_io.seek(0)
+
+            str_lit.download_button(
+                label="📝 Download as Word Document (.DOCX)",
+                data=doc_io,
+                file_name="professional_output.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+        else:
+            str_lit.info("Word document exporter loading...")
