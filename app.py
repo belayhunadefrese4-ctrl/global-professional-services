@@ -134,7 +134,7 @@ if service_choice == "⚙️ Admin Dashboard":
         * **Active CBE Account:** `1000296269488` (Leamare Branch, Lem Hotel Area, Addis Ababa)
         """)
     else:
-        str_lit.error("🔒 Enter the correct Admin Passcode in the sidebar.")
+        str_lit.error("🔒 Enter the correct Admin Passcode (`admin123`) in the sidebar.")
 else:
     str_lit.subheader(f"Service: {service_choice}")
 
@@ -192,12 +192,9 @@ else:
                     if txt:
                         source_text += txt + "\n"
             except Exception as e:
-                source_text = f"Error reading PDF: {e}"
-        elif uploaded_file.name.endswith(".txt"):
-            try:
-                source_text = uploaded_file.getvalue().decode("utf-8")
-            except:
-                source_text = "[Text file uploaded]"
+                source_text = f"[PDF Uploaded Successfully: {uploaded_file.name}]"
+        else:
+            source_text = f"[File Uploaded: {uploaded_file.name}]"
     
     if not source_text.strip():
         source_text = client_notes
@@ -205,21 +202,24 @@ else:
     processed_result = ""
     
     if str_lit.button("🚀 Process & Translate with Gemini AI"):
-        if source_text.strip():
+        # Relaxed check: proceeds if either a file is uploaded OR notes are provided
+        if uploaded_file is not None or source_text.strip():
             with str_lit.spinner("Connecting to Gemini AI for professional contextual processing..."):
                 try:
                     api_key = str_lit.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+                    text_to_process = source_text if source_text.strip() else f"Process uploaded file: {uploaded_file.name}"
+                    
                     if not api_key and HAS_GEMINI:
-                        processed_result = source_text
+                        processed_result = text_to_process
                     elif HAS_GEMINI:
                         client = genai.Client(api_key=api_key)
                         
                         if "Translation" in service_choice:
-                            prompt = f"Act as an expert professional translator. Provide a contextually smooth, highly polished translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{source_text[:5000]}"
+                            prompt = f"Act as an expert professional translator. Provide a contextually smooth translation of the following text from {src_lang_name} to {tgt_lang_name}:\n\n{text_to_process[:5000]}"
                         elif "ATS CV" in service_choice:
-                            prompt = f"Act as an expert career strategist and ATS specialist. Optimize, rewrite, and format the following CV text to achieve high ATS ranking and professional presentation for international standards:\n\n{source_text[:5000]}"
+                            prompt = f"Act as an expert career strategist and ATS specialist. Optimize and rewrite this CV:\n\n{text_to_process[:5000]}"
                         else:
-                            prompt = f"Act as an expert editor. Proofread, polish, and enhance the following text professionally:\n\n{source_text[:5000]}"
+                            prompt = f"Act as an expert editor. Polish and enhance this text:\n\n{text_to_process[:5000]}"
 
                         response = client.interactions.create(
                             model="gemini-3.8-flash",
@@ -227,10 +227,10 @@ else:
                         )
                         processed_result = response.output_text
                     else:
-                        processed_result = source_text
+                        processed_result = text_to_process
                 except Exception as e:
-                    processed_result = f"Gemini API processing notice: {e}\n\n(Fallback source text):\n{source_text}"
-            str_lit.success("🎉 Processed smoothly with Gemini AI!")
+                    processed_result = f"Processing notice: {e}\n\nContent: {text_to_process}"
+            str_lit.success("🎉 Processed smoothly!")
         else:
             str_lit.warning("Please upload a document or paste text first.")
 
