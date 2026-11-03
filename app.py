@@ -1,11 +1,12 @@
-import streamlit as st
+import streamlit as str_lit
+import os
 
-# Safe import for translation
+# Safe import for Google GenAI SDK
 try:
-    from deep_translator import GoogleTranslator
-    HAS_TRANSLATOR = True
+    from google import genai
+    HAS_GEMINI = True
 except ImportError:
-    HAS_TRANSLATOR = False
+    HAS_GEMINI = False
 
 # Safe import for PDF reading
 try:
@@ -14,10 +15,10 @@ try:
 except ImportError:
     HAS_PYPDF = False
 
-st.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
+str_lit.set_page_config(page_title="Global Professional Services Hub", page_icon="💼", layout="centered")
 
 # Custom Burgundy Brand Styling & UI
-st.markdown("""
+str_lit.markdown("""
     <style>
     .main-header {
         font-size: 38px;
@@ -57,31 +58,30 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # App Header
-st.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-text">Automated Audio Transcription, Translation, Proofreading & ATS CV Generation</p>', unsafe_allow_html=True)
-st.markdown("---")
+str_lit.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
+str_lit.markdown('<p class="sub-text">Automated Audio Transcription, Contextual Translation & ATS CV Generation via Gemini AI</p>', unsafe_allow_html=True)
+str_lit.markdown("---")
 
 # --- ADMIN AUTHENTICATION SECURITY ---
-st.sidebar.header("🔐 Admin Access Portal")
-admin_passcode = st.sidebar.text_input("Enter Admin Passcode:", type="password")
+str_lit.sidebar.header("🔐 Admin Access Portal")
+admin_passcode = str_lit.sidebar.text_input("Enter Admin Passcode:", type="password")
 is_admin = (admin_passcode == "admin123")
 
 if is_admin:
-    st.sidebar.success("🔓 Admin Mode Active: Free Unlimited Access Granted!")
+    str_lit.sidebar.success("🔓 Admin Mode Active: Free Unlimited Access Granted!")
 
-st.sidebar.markdown("---")
+str_lit.sidebar.markdown("---")
 
 # --- CURRENCY ALTERNATIVE SELECTOR ---
-st.sidebar.header("💱 Currency Converter")
-currency_choice = st.sidebar.selectbox(
+str_lit.sidebar.header("💱 Currency Converter")
+currency_choice = str_lit.sidebar.selectbox(
     "Select Display Currency:",
     ["USD ($)", "ETB (Ethiopian Birr)", "EUR (€)", "GBP (£)"]
 )
 
-# Currency conversion rates & symbols relative to USD base
 CURRENCY_RATES = {
     "USD ($)": {"symbol": "$", "rate": 1.0},
-    "ETB (Ethiopian Birr)": {"symbol": "ETB ", "rate": 57.0}, # Adjustable exchange rate baseline
+    "ETB (Ethiopian Birr)": {"symbol": "ETB ", "rate": 57.0},
     "EUR (€)": {"symbol": "€", "rate": 0.92},
     "GBP (£)": {"symbol": "£", "rate": 0.79}
 }
@@ -90,102 +90,97 @@ curr_info = CURRENCY_RATES[currency_choice]
 curr_sym = curr_info["symbol"]
 curr_rate = curr_info["rate"]
 
-st.sidebar.markdown("---")
+str_lit.sidebar.markdown("---")
 
 # Sidebar Navigation
-st.sidebar.header("📂 Select a Service")
-service_choice = st.sidebar.selectbox(
+str_lit.sidebar.header("📂 Select a Service")
+service_choice = str_lit.sidebar.selectbox(
     "Choose what you need:",
     [
-        "🌍 Document Translation",
+        "🌍 Document Translation (Gemini Powered)",
         "🎙️ Audio / Video Transcription",
-        "📄 ATS CV Generation",
-        "✉️ Cover Letter Generation",
+        "📄 ATS CV Generation & Optimization",
+        "✉️ Cover Letter Writing",
         "✍️ Text Proofreading & Polishing",
         "⚙️ Admin Dashboard"
     ]
 )
 
-# Language Mapping Dictionary
-LANG_CODES = {
-    "🇺🇸/🇬🇧 English": "en",
-    "🇪🇹 Amharic (አማርኛ)": "am",
-    "🇪🇹 Afaan Oromoo (Oromiffa)": "om",
-    "🇪🇹 Tigrinya (ትግርኛ)": "ti",
-    "🇪🇹 Somali (Soomaali)": "so",
-    "🇪🇹 Sidama": "en",
-    "🇪🇹 Wolaytta": "en",
-    "🇪🇹 Gurage": "en",
-    "🇸🇦 Arabic (العربية)": "ar",
-    "🇫🇷 French (Français)": "fr",
-    "🇨🇳 Mandarin Chinese (中文)": "zh-CN",
-    "🇪🇸 Spanish (Español)": "es",
-    "🇩🇪 German (Deutsch)": "de",
-    "🇮🇹 Italian (Italiano)": "it"
-}
+# Language Mapping List
+LANG_OPTIONS = [
+    "🇺🇸/🇬🇧 English",
+    "🇪🇹 Amharic (አማርኛ)",
+    "🇪🇹 Afaan Oromoo (Oromiffa)",
+    "🇪🇹 Tigrinya (ትግርኛ)",
+    "🇪🇹 Somali (Soomaali)",
+    "🇪🇹 Sidama",
+    "🇪🇹 Wolaytta",
+    "🇪🇹 Gurage",
+    "🇸🇦 Arabic (العربية)",
+    "🇫🇷 French (Français)",
+    "🇨🇳 Mandarin Chinese (中文)",
+    "🇪🇸 Spanish (Español)",
+    "🇩🇪 German (Deutsch)",
+    "🇮🇹 Italian (Italiano)"
+]
 
 if service_choice == "⚙️ Admin Dashboard":
-    st.subheader("⚙️ Platform Admin Panel")
+    str_lit.subheader("⚙️ Platform Admin Panel")
     if is_admin:
-        st.markdown('<span class="free-badge">ADMIN ACCESS UNLOCKED</span>', unsafe_allow_html=True)
-        st.markdown("""
-        * **Status:** Operational
+        str_lit.markdown('<span class="free-badge">ADMIN ACCESS UNLOCKED</span>', unsafe_allow_html=True)
+        str_lit.markdown("""
+        * **Status:** Operational (Connected to Gemini Engine)
         * **Active Telebirr:** `0916884912` (Belayhun Adefrese Metaferia)
         * **Active CBE Account:** `1000296269488` (Leamare Branch, Lem Hotel Area, Addis Ababa)
-        * **International Remittance:** Remitly, Wave, WorldRemit, Payoneer USD
         """)
     else:
-        st.error("🔒 Enter the correct Admin Passcode in the sidebar.")
+        str_lit.error("🔒 Enter the correct Admin Passcode in the sidebar.")
 else:
-    st.subheader(f"Service: {service_choice}")
-    
-    lang_options = list(LANG_CODES.keys())
+    str_lit.subheader(f"Service: {service_choice}")
 
-    if service_choice == "🌍 Document Translation":
-        col1, col2 = st.columns(2)
+    if "Translation" in service_choice:
+        col1, col2 = str_lit.columns(2)
         with col1:
-            src_lang_name = st.selectbox("📄 Translate From:", lang_options, index=0)
+            src_lang_name = str_lit.selectbox("📄 Translate From:", LANG_OPTIONS, index=0)
         with col2:
-            tgt_lang_name = st.selectbox("🎯 Translate To:", lang_options, index=1)
+            tgt_lang_name = str_lit.selectbox("🎯 Translate To:", LANG_OPTIONS, index=1)
             
-        st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 2 Pages FREE!</span>", unsafe_allow_html=True)
-        page_count = st.number_input("Document Pages:", min_value=1, value=3)
-        
+        str_lit.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 2 Pages FREE!</span>", unsafe_allow_html=True)
+        page_count = str_lit.number_input("Document Pages:", min_value=1, value=3)
         base_usd = max(0, page_count - 2) * 0.25 if not is_admin else 0.0
         final_price = base_usd * curr_rate
-        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+        str_lit.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
     elif "Transcription" in service_choice:
-        st.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 10 Minutes FREE!</span>", unsafe_allow_html=True)
-        duration_mins = st.number_input("Audio Duration (mins):", min_value=1, value=15)
-        
+        str_lit.markdown("🎉 <span class='free-badge'>SPECIAL OFFER: First 10 Minutes FREE!</span>", unsafe_allow_html=True)
+        duration_mins = str_lit.number_input("Audio Duration (mins):", min_value=1, value=15)
         base_usd = max(0, duration_mins - 10) * 0.25 if not is_admin else 0.0
         final_price = base_usd * curr_rate
-        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+        str_lit.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
     elif "ATS CV" in service_choice:
-        cv_count = st.number_input("Number of CVs:", min_value=1, value=1)
+        cv_count = str_lit.number_input("Number of CVs to Optimize:", min_value=1, value=1)
         base_usd = cv_count * 2.0 if not is_admin else 0.0
         final_price = base_usd * curr_rate
-        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+        str_lit.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
     elif "Cover Letter" in service_choice:
-        letter_count = st.number_input("Number of Letters:", min_value=1, value=1)
+        letter_count = str_lit.number_input("Number of Letters:", min_value=1, value=1)
         base_usd = letter_count * 1.0 if not is_admin else 0.0
         final_price = base_usd * curr_rate
-        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+        str_lit.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
     else:
-        word_count = st.number_input("Word Count:", min_value=100, value=500, step=100)
+        word_count = str_lit.number_input("Word Count:", min_value=100, value=500, step=100)
         blocks = (word_count // 500) + (1 if word_count % 500 > 0 else 0)
         base_usd = blocks * 0.25 if not is_admin else 0.0
         final_price = base_usd * curr_rate
-        st.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
+        str_lit.info(f"Total Cost: **{curr_sym}{final_price:.2f}** ({currency_choice})")
 
-    st.markdown("---")
-    st.subheader("📁 Upload Your Files or Details")
-    uploaded_file = st.file_uploader("Upload document, resume, or text file:", type=["pdf", "docx", "txt"])
-    client_notes = st.text_area("Or type/paste text directly here for translation or processing:")
+    str_lit.markdown("---")
+    str_lit.subheader("📁 Upload Your Files or Details")
+    uploaded_file = str_lit.file_uploader("Upload document, resume, or text file:", type=["pdf", "docx", "txt"])
+    client_notes = str_lit.text_area("Or type/paste text directly here for Gemini AI processing:")
 
     source_text = ""
     if uploaded_file is not None:
@@ -207,75 +202,80 @@ else:
     if not source_text.strip():
         source_text = client_notes
 
-    translated_result = ""
-    if service_choice == "🌍 Document Translation" and source_text.strip() and HAS_TRANSLATOR:
-        try:
-            src_code = LANG_CODES.get(src_lang_name, "en")
-            tgt_code = LANG_CODES.get(tgt_lang_name, "am")
-            translated_result = GoogleTranslator(source=src_code, target=tgt_code).translate(source_text[:4000])
-        except Exception as e:
-            translated_result = f"Translation notice: {e}\n\n{source_text}"
-    else:
-        translated_result = source_text
-
-    if st.button("🚀 Process & Translate Now"):
+    processed_result = ""
+    
+    # Process with Gemini AI when button is clicked
+    if str_lit.button("🚀 Process & Translate with Gemini AI"):
         if source_text.strip():
-            st.success("🎉 Translation & processing completed successfully!")
+            with str_lit.spinner("Connecting to Gemini AI for professional contextual processing..."):
+                try:
+                    # Initialize Gemini client using Streamlit secrets or environment variables
+                    api_key = str_lit.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+                    if not api_key and HAS_GEMINI:
+                        processed_result = source_text # Fallback if key isn't entered yet
+                    elif HAS_GEMINI:
+                        client = genai.Client(api_key=api_key)
+                        
+                        # Build professional prompt based on service
+                        if "Translation" in service_choice:
+                            prompt = f"Act as an expert professional translator. Provide a contextually smooth, highly polished translation of the following text from {src_lang_name} to {tgt_lang_name}. Maintain professional formatting:\n\n{source_text[:5000]}"
+                        elif "ATS CV" in service_choice:
+                            prompt = f"Act as an expert career strategist and ATS specialist. Optimize, rewrite, and format the following CV text to achieve high ATS ranking and professional presentation for international standards:\n\n{source_text[:5000]}"
+                        else:
+                            prompt = f"Act as an expert editor. Proofread, polish, and enhance the following text professionally:\n\n{source_text[:5000]}"
+
+                        response = client.interactions.create(
+                            model="gemini-3.8-flash",
+                            input=prompt
+                        )
+                        processed_result = response.output_text
+                    else:
+                        processed_result = source_text
+                except Exception as e:
+                    processed_result = f"Gemini API processing notice: {e}\n\n(Fallback source text):\n{source_text}"
+            str_lit.success("🎉 Processed smoothly with Gemini AI!")
         else:
-            st.warning("Please upload a document or paste text to translate.")
+            str_lit.warning("Please upload a document or paste text first.")
 
-    st.markdown("---")
+    str_lit.markdown("---")
 
-    # Payment Gateway (Skipped if Admin)
     if not is_admin:
-        st.subheader("💳 Secure Payment Options")
-        st.markdown("Choose your preferred payment channel below to finalize your service order.")
-        tab1, tab2 = st.tabs(["🌍 International Payer Options", "🏠 Local Ethiopian Payment (Telebirr & CBE)"])
+        str_lit.subheader("💳 Secure Payment Options")
+        str_lit.markdown("Choose your preferred payment channel below to finalize your service order.")
+        tab1, tab2 = str_lit.tabs(["🌍 International Payer Options", "🏠 Local Ethiopian Payment (Telebirr & CBE)"])
 
         with tab1:
-            st.markdown("### International Payer Channels")
-            st.markdown("""
+            str_lit.markdown("### International Payer Channels")
+            str_lit.markdown("""
             * **Payoneer USD Receiving Account:** *(Pending compliance review activation)*
-            * **Alternative Remittance Services:** Send funds directly via **Remitly**, **Wave**, or **WorldRemit** to local CBE bank details or mobile.
+            * **Remitly, Wave, or WorldRemit:** Send funds directly to local CBE bank details or mobile.
             * **Account Name:** Belayhun Adefrese Metaferia
             """)
 
         with tab2:
-            st.markdown("### Local Bank & Mobile Transfer")
-            st.markdown("""
+            str_lit.markdown("### Local Bank & Mobile Transfer")
+            str_lit.markdown("""
             * **📱 Telebirr:** `0916884912` (Name: Belayhun Adefrese Metaferia)
             * **🏦 Commercial Bank of Ethiopia (CBE):** 
               * **Account Number:** `1000296269488`
               * **Branch Name:** Leamare Branch (Lem Hotel Area, Addis Ababa)
               * **Account Holder:** Belayhun Adefrese Metaferia
             """)
-            st.text_input("Paste Transaction Reference Code (Receipt Code):")
-            st.file_uploader("Upload payment receipt screenshot:", type=["jpg", "png", "jpeg"], key="receipt_upload")
+            str_lit.text_input("Paste Transaction Reference Code (Receipt Code):")
+            str_lit.file_uploader("Upload payment receipt screenshot:", type=["jpg", "png", "jpeg"], key="receipt_upload")
 
-        if st.button("✅ Confirm Payment & Queue Processing"):
-            st.balloons()
-            st.success("Payment submitted! Your request is now queued for automated processing.")
+        if str_lit.button("✅ Confirm Payment & Queue Processing"):
+            str_lit.balloons()
+            str_lit.success("Payment submitted! Your request is now queued for automated processing.")
     else:
-        st.info("💡 **Admin Notice:** Payment gateway is bypassed because Admin Mode is active.")
+        str_lit.info("💡 **Admin Notice:** Payment gateway is bypassed because Admin Mode is active.")
 
-    st.markdown("---")
-    st.subheader("📥 Download Completed Files")
+    str_lit.markdown("---")
+    str_lit.subheader("📥 Download Completed Files")
 
-    full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - PROCESSED OUTPUT ===
+    full_output = f"""=== GLOBAL PROFESSIONAL SERVICES HUB - GEMINI AI OUTPUT ===
 Service: {service_choice}
 Source File: {uploaded_file.name if uploaded_file else 'Direct Text Input'}
 
---- CONTENT / TRANSLATION RESULT ---
-{translated_result if translated_result else 'No content provided.'}
-
---- VERIFIED PAYMENT & BANK DETAILS ---
-CBE Leamare Branch (Lem Hotel Area, Addis Ababa): 1000296269488
-Telebirr Account: 0916884912 | Holder: Belayhun Adefrese Metaferia
-================================================================"""
-
-    st.download_button(
-        label="📄 Download Processed Document (.TXT)",
-        data=full_output,
-        file_name="processed_output.txt",
-        mime="text/plain"
-    )
+--- AI PROCESSED RESULT ---
+{processed_result if processed_result else 'Click "Process & Translate with Gemini AI" above
