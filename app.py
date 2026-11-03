@@ -1,58 +1,79 @@
 import streamlit as st
 
-# Page Configuration
+# Page Configuration & Brand Styling
 st.set_page_config(
     page_title="Global Professional Services Hub",
     page_icon="💼",
     layout="centered"
 )
 
-# App Header
-st.title("🌐 Global Professional Services Platform")
+# Custom Brand Styling (Attractive Colors & Clean Header)
 st.markdown("""
-Welcome! We provide automated **Audio/Video Transcription**, **Multilingual Translation**, **Proofreading**, and **ATS CV & Cover Letter Generation**.
-""")
+    <style>
+    .main-header {
+        font-size: 32px;
+        color: #1E3A8A;
+        font-weight: bold;
+        text-align: center;
+    }
+    .sub-text {
+        font-size: 16px;
+        color: #4B5563;
+        text-align: center;
+    }
+    .box-card {
+        background-color: #F3F4F6;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #2563EB;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# App Header
+st.markdown('<p class="main-header">🌐 Global Professional Services Hub</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-text">Automated Audio Transcription, Translation, Proofreading & ATS CV/Cover Letter Generation</p>', unsafe_allow_html=True)
 
 st.markdown("---")
 
-# Sidebar for Service Selection
-st.sidebar.header("Select a Service")
+# Sidebar for Service Selection with Icons
+st.sidebar.header("📂 Select a Service")
 service_choice = st.sidebar.selectbox(
     "Choose what you need:",
     [
-        "Audio / Video Transcription",
-        "Document Translation",
-        "ATS CV Generation",
-        "Cover Letter Generation",
-        "Text Proofreading & Polishing"
+        "🎙️ Audio / Video Transcription",
+        "🌍 Document Translation",
+        "📄 ATS CV Generation",
+        "✉️ Cover Letter Generation",
+        "✍️ Text Proofreading & Polishing"
     ]
 )
 
 # Service Calculator & Pricing
 st.subheader(f"Service: {service_choice}")
 
-if service_choice == "Audio / Video Transcription":
+if "Transcription" in service_choice:
     st.markdown("**Rate:** Minimum **$0.25 USD** (or **1 ETB**) per minute.")
     duration_mins = st.number_input("Enter Audio Duration (in minutes):", min_value=1, value=10)
     total_usd = duration_mins * 0.25
     total_etb = duration_mins * 1.0
     st.info(f"**Estimated Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
-elif service_choice == "Document Translation":
+elif "Translation" in service_choice:
     st.markdown("**Rate:** **$0.25 USD** (or **1 ETB**) per page.")
     page_count = st.number_input("Enter Document Page Count:", min_value=1, value=2)
     total_usd = page_count * 0.25
     total_etb = page_count * 1.0
     st.info(f"**Estimated Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
-elif service_choice == "ATS CV Generation":
+elif "ATS CV" in service_choice:
     st.markdown("**Rate:** Fixed Tier — Minimum **$2.00 USD** or **10 ETB** per document.")
     cv_count = st.number_input("Number of CVs to generate/rewrite:", min_value=1, value=1)
     total_usd = cv_count * 2.00
     total_etb = cv_count * 10.0
     st.info(f"**Total Cost:** ${total_usd:.2f} USD / {total_etb:.2f} ETB")
 
-elif service_choice == "Cover Letter Generation":
+elif "Cover Letter" in service_choice:
     st.markdown("**Rate:** Fixed Tier — Minimum **$1.00 USD** or **5 ETB** per letter.")
     letter_count = st.number_input("Number of Cover Letters to generate:", min_value=1, value=1)
     total_usd = letter_count * 1.00
@@ -71,41 +92,57 @@ st.markdown("---")
 
 # File Upload Section
 st.subheader("📁 Upload Your Files or Details")
-uploaded_file = st.file_uploader("Upload document, resume draft, or job description:", type=["pdf", "docx", "txt", "mp3", "wav", "mp4"])
+uploaded_file = st.file_uploader("Upload document, resume draft, audio, or instructions:", type=["pdf", "docx", "txt", "mp3", "wav", "mp4"])
 client_notes = st.text_area("Provide target job description, specific instructions, or target language:")
 
-if st.button("Submit Order"):
+if st.button("Submit Order Request"):
     if uploaded_file is not None or client_notes.strip() != "":
-        st.success("Details uploaded successfully! Please proceed to payment below to initiate processing.")
+        st.success("Details uploaded successfully! Please complete your payment below.")
     else:
         st.warning("Please upload a file or enter instructions before submitting your order.")
 
 st.markdown("---")
 
-# Payment Section
-st.subheader("💳 Payment Gateway")
-st.markdown("Choose your payment method below to complete your order.")
+# Payment Gateway Section
+st.subheader("💳 Secure Payment Options")
+st.markdown("Choose your preferred payment channel below to finalize your service order.")
 
-tab1, tab2 = st.tabs(["🌍 International Payment (Payoneer)", "🏠 Local Payment (Telebirr & CBE)"])
+tab1, tab2 = st.tabs(["🌍 International Payer Options", "🏠 Local Ethiopian Payment (Telebirr & CBE)"])
 
 with tab1:
-    st.markdown("### Payoneer USD Receiving Account")
+    st.markdown("### International Payer Channels")
     st.markdown("""
-    * **Bank Name:** First Century Bank / Community Federal Savings Bank
-    * **Routing Number (ABA):** *(Pending Payoneer review approval)*
-    * **Account Number:** *(Pending Payoneer review approval)*
-    * **Account Holder:** Belayhun Adefrese Metaferia
+    * **Payoneer USD Receiving Account:** *(Pending compliance review activation)*
+    * **Alternative Remittance Services:** International payers can easily send funds directly using **Remitly**, **Wave**, or **WorldRemit** linked to local CBE accounts or mobile details.
+    * **Account Name:** Belayhun Adefrese Metaferia
     """)
 
 with tab2:
-    st.markdown("### Local Ethiopian Transfer")
+    st.markdown("### Local Bank & Mobile Transfer")
     st.markdown("""
-    * **Telebirr:** `0916884912` (Name: Belayhun Adefrese Metaferia)
-    * **Commercial Bank of Ethiopia (CBE):** *[Your CBE Account Number]*
+    * **📱 Telebirr:** `0916884912` (Name: Belayhun Adefrese Metaferia)
+    * **🏦 Commercial Bank of Ethiopia (CBE):** 
+      * **Account Number:** `1000296269488`
+      * **Branch Name:** Leamare Branch
+      * **Account Holder:** Belayhun Adefrese Metaferia
     """)
-    st.text_input("Paste Telebirr / CBE Transaction Reference Code:")
-    st.file_uploader("Upload screenshot receipt:", type=["jpg", "png", "jpeg"], key="receipt_upload")
+    st.text_input("Paste Transaction Reference Code (Receipt Code):")
+    st.file_uploader("Upload payment receipt screenshot:", type=["jpg", "png", "jpeg"], key="receipt_upload")
 
-if st.button("Confirm Payment & Process Request"):
+if st.button("Confirm Payment & Queue Processing"):
     st.balloons()
-    st.success("Payment details submitted! Your order is queued for processing.")
+    st.success("Payment submitted! Your request is now queued for processing.")
+
+st.markdown("---")
+
+# Download Section for Completed Deliverables
+st.subheader("📥 Download Completed Files")
+st.markdown("Once your audio transcription, translated document, or ATS CV is ready, download it securely below using the download button.")
+
+# Simulated dummy download item for user experience
+st.download_button(
+    label="⬇️ Download Completed Result (Sample File)",
+    data="Sample processed text output from Global Professional Services Hub.",
+    file_name="completed_professional_service.txt",
+    mime="text/plain"
+)
