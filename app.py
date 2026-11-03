@@ -147,7 +147,7 @@ else:
 
     str_lit.markdown("---")
     str_lit.subheader("📝 Enter or Paste Source Text")
-    client_notes = str_lit.text_area("Type or paste normal client text here (do not paste code):", height=180)
+    client_notes = str_lit.text_area("Type or paste normal client text here:", height=180)
 
     if str_lit.button("🚀 Process & Generate Deliverable"):
         if client_notes.strip():
@@ -195,20 +195,22 @@ else:
     with col_a:
         str_lit.download_button("📄 Download as .TXT", data=output_text, file_name="deliverable.txt", mime="text/plain")
     with col_b:
-        # Guaranteed Word Document Download Generator
-        doc = Document()
-        doc.add_heading("Global Professional Services Hub", level=1)
-        doc.add_heading(f"Service: {service_choice}", level=2)
-        doc.add_paragraph(output_text)
-        doc.add_paragraph("\n--- Verified Payment & Agency Bank Details ---\nCBE Leamare Branch (Addis Ababa): 1000296269488\nTelebirr: 0916884912 | Holder: Belayhun Adefrese Metaferia")
-        
-        doc_io = io.BytesIO()
-        doc.save(doc_io)
-        doc_io.seek(0)
+        if HAS_DOCX:
+            doc = Document()
+            doc.add_heading("Global Professional Services Hub", level=1)
+            doc.add_heading(f"Service: {service_choice}", level=2)
+            doc.add_paragraph(output_text)
+            doc.add_paragraph("\n--- Verified Payment & Agency Bank Details ---\nCBE Leamare Branch (Addis Ababa): 1000296269488\nTelebirr: 0916884912 | Holder: Belayhun Adefrese Metaferia")
+            
+            doc_io = io.BytesIO()
+            doc.save(doc_io)
+            doc_io.seek(0)
 
-        str_lit.download_button(
-            label="📝 Download as .DOCX",
-            data=doc_io,
-            file_name="deliverable.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+            str_lit.download_button(
+                label="📝 Download as .DOCX",
+                data=doc_io,
+                file_name="deliverable.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+        else:
+            str_lit.info("Word document exporter loading...")
