@@ -87,12 +87,6 @@ str_lit.sidebar.markdown("---")
 str_lit.sidebar.header("⚙️ Gemini AI Engine")
 gemini_api_key = str_lit.sidebar.text_input("Enter Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
-if gemini_api_key and HAS_GEMINI:
-    genai.configure(api_key=gemini_api_key.strip())
-    ai_configured = True
-else:
-    ai_configured = False
-
 str_lit.sidebar.markdown("---")
 
 # Currency Converter
@@ -173,7 +167,6 @@ else:
     
     client_notes = str_lit.text_area("Or type/paste source text directly here:", height=140)
 
-    # Robust file ingestion and handling
     extracted_file_text = ""
     is_media_file = False
     temp_media_path = None
@@ -199,7 +192,6 @@ else:
             except Exception:
                 extracted_file_text = uploaded_file.getvalue().decode("latin-1", errors="ignore")
         else:
-            # Handle Audio / Video media files natively using temporary files for Gemini File API
             is_media_file = True
             suffix = os.path.splitext(uploaded_file.name)[1]
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -213,44 +205,44 @@ else:
             with str_lit.spinner("Executing Deep Multimodal AI Processing..."):
                 ai_output = ""
                 
-                if ai_configured:
+                if not gemini_api_key or not gemini_api_key.strip():
+                    ai_output = "[Error: Please enter your Gemini API Key in the sidebar input box.]"
+                elif not HAS_GEMINI:
+                    ai_output = "[Error: google-generativeai library is not installed in requirements.txt]"
+                else:
                     try:
+                        genai.configure(api_key=gemini_api_key.strip())
                         model = genai.GenerativeModel("gemini-1.5-flash")
                         
-                        # If media file is uploaded, upload to Gemini File API for real transcription/analysis
                         if is_media_file and temp_media_path:
                             uploaded_gemini_file = genai.upload_file(temp_media_path)
-                            prompt = "Accurately transcribe, format, and structure this audio/video recording into clean professional paragraphs with timestamps if applicable:"
+                            prompt = "Accurately transcribe, format, and structure this audio/video recording into clean professional paragraphs:"
                             response = model.generate_content([uploaded_gemini_file, prompt])
                             ai_output = response.text
-                            # Cleanup temp file
                             try:
                                 os.unlink(temp_media_path)
                             except:
                                 pass
                         else:
-                            # Standard text/document processing prompts
                             if "Translation" in service_choice:
-                                prompt = f"Translate the following text accurately and professionally from {src_lang_name} to {tgt_lang_name}. Provide only the clean, high-quality translation output:\n\n{final_input_text}"
+                                prompt = f"Translate the following text accurately from {src_lang_name} to {tgt_lang_name}. Provide ONLY the final translation output in {tgt_lang_name}:\n\n{final_input_text}"
                             elif "Transcription" in service_choice:
-                                prompt = f"Clean up, format, and structure the following raw transcript into professional, accurate paragraphs:\n\n{final_input_text}"
+                                prompt = f"Clean up and format this transcript into professional paragraphs:\n\n{final_input_text}"
                             elif "ATS CV" in service_choice:
-                                prompt = f"Optimize the following resume text for ATS (Applicant Tracking Systems) with strong professional bullet points, hard keywords, and executive formatting:\n\n{final_input_text}"
+                                prompt = f"Optimize this resume text for ATS recruitment with strong professional bullet points and keywords:\n\n{final_input_text}"
                             elif "Cover Letter" in service_choice:
-                                prompt = f"Write a compelling, professional executive cover letter based on these details:\n\n{final_input_text}"
+                                prompt = f"Write a compelling executive cover letter based on:\n\n{final_input_text}"
                             else:
-                                prompt = f"Proofread and thoroughly polish the following text for grammar, executive flow, and professional tone:\n\n{final_input_text}"
+                                prompt = f"Proofread and polish this text for professional grammar and flow:\n\n{final_input_text}"
                             
                             response = model.generate_content(prompt)
                             if response and response.text:
-                                ai_output = response.text
+                                ai_output = response.text.strip()
+                            else:
+                                ai_output = "[Error: Model returned an empty response. Check API key permissions.]"
                     except Exception as e:
-                        ai_output = f"[AI Execution Error: {e}]\n\nPlease verify your Gemini API key in the sidebar."
+                        ai_output = f"[Gemini API Exception: {str(e)}]"
 
-                if not ai_output:
-                    ai_output = final_input_text if final_input_text else "[Error: No input detected for processing.]"
-
-                # Format final deliverable record headers
                 if "Translation" in service_choice:
                     str_lit.session_state.processed_result = f"=== PROFESSIONAL GEMINI AI TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{ai_output}\n\n[Certified by Global Professional Services Hub]"
                 elif "Transcription" in service_choice:
