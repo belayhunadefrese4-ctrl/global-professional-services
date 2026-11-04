@@ -135,7 +135,7 @@ if service_choice == "⚙️ Admin Dashboard":
     str_lit.subheader("⚙️ Platform Admin Panel")
     if is_admin:
         str_lit.markdown("""
-        * **Platform Status:** Fully Operational & Modern GenAI SDK Connected
+        * **Platform Status:** Fully Operational & Stable (gemini-1.5-flash)
         * **Telebirr Merchant:** `0916884912` (Belayhun Adefrese Metaferia)
         * **CBE Corporate Account:** `1000296269488` (Leamare Branch, Addis Ababa)
         """)
@@ -202,7 +202,7 @@ else:
 
     if str_lit.button("🚀 Process & Generate Live AI Deliverable"):
         if final_input_text.strip() or is_media_file:
-            with str_lit.spinner("Executing Modern Google GenAI Processing..."):
+            with str_lit.spinner("Executing Google GenAI Processing..."):
                 ai_output = ""
                 
                 if not gemini_api_key or not gemini_api_key.strip():
@@ -211,14 +211,13 @@ else:
                     ai_output = "[Error: google-genai library is not installed in requirements.txt]"
                 else:
                     try:
-                        # Initialize modern Google GenAI Client
                         client = genai.Client(api_key=gemini_api_key.strip())
                         
                         if is_media_file and temp_media_path:
                             uploaded_file_res = client.files.upload(file=temp_media_path)
                             prompt = "Accurately transcribe, format, and structure this audio/video recording into clean professional paragraphs:"
                             response = client.models.generate_content(
-                                model="gemini-3.8-flash",
+                                model="gemini-1.5-flash",
                                 contents=[uploaded_file_res, prompt]
                             )
                             ai_output = response.text
@@ -239,7 +238,7 @@ else:
                                 prompt = f"Proofread and polish this text for professional grammar and flow:\n\n{final_input_text}"
                             
                             response = client.models.generate_content(
-                                model="gemini-3.8-flash",
+                                model="gemini-1.5-flash",
                                 contents=prompt
                             )
                             if response and response.text:
@@ -292,17 +291,4 @@ else:
             doc.add_heading("Global Professional Services Hub", level=1)
             doc.add_heading(f"Service Category: {service_choice}", level=2)
             doc.add_paragraph(output_text)
-            doc.add_paragraph("\n--- Verified Agency Payment & Bank Details ---\nCBE Leamare Branch (Addis Ababa): 1000296269488\nTelebirr Wallet: 0916884912 | Holder: Belayhun Adefrese Metaferia")
-            
-            doc_io = io.BytesIO()
-            doc.save(doc_io)
-            doc_io.seek(0)
-
-            str_lit.download_button(
-                label="📝 Download Formatted Document (.DOCX)",
-                data=doc_io,
-                file_name="professional_deliverable.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-        else:
-            str_lit.info("Word document exporter loading...")
+            doc.
