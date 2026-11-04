@@ -212,7 +212,8 @@ else:
                 else:
                     try:
                         genai.configure(api_key=gemini_api_key.strip())
-                        model = genai.GenerativeModel("gemini-pro")
+                        # Using current stable model string
+                        model = genai.GenerativeModel("gemini-3.8-flash")
                         
                         if is_media_file and temp_media_path:
                             uploaded_gemini_file = genai.upload_file(temp_media_path)
