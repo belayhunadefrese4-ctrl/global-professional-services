@@ -135,7 +135,7 @@ if service_choice == "⚙️ Admin Dashboard":
     str_lit.subheader("⚙️ Platform Admin Panel")
     if is_admin:
         str_lit.markdown("""
-        * **Platform Status:** Fully Operational & Multimodal Connected
+        * **Platform Status:** Fully Operational & Self-Healing AI Router Active
         * **Telebirr Merchant:** `0916884912` (Belayhun Adefrese Metaferia)
         * **CBE Corporate Account:** `1000296269488` (Leamare Branch, Addis Ababa)
         """)
@@ -202,7 +202,7 @@ else:
 
     if str_lit.button("🚀 Process & Generate Live AI Deliverable"):
         if final_input_text.strip() or is_media_file:
-            with str_lit.spinner("Executing Deep Multimodal AI Processing..."):
+            with str_lit.spinner("Executing Self-Healing AI Multimodal Routing..."):
                 ai_output = ""
                 
                 if not gemini_api_key or not gemini_api_key.strip():
@@ -210,39 +210,50 @@ else:
                 elif not HAS_GEMINI:
                     ai_output = "[Error: google-generativeai library is not installed in requirements.txt]"
                 else:
-                    try:
-                        genai.configure(api_key=gemini_api_key.strip())
-                        # Using current stable model string
-                        model = genai.GenerativeModel("gemini-1.5-flash")
-                        
-                        if is_media_file and temp_media_path:
-                            uploaded_gemini_file = genai.upload_file(temp_media_path)
-                            prompt = "Accurately transcribe, format, and structure this audio/video recording into clean professional paragraphs:"
-                            response = model.generate_content([uploaded_gemini_file, prompt])
-                            ai_output = response.text
-                            try:
-                                os.unlink(temp_media_path)
-                            except:
-                                pass
-                        else:
-                            if "Translation" in service_choice:
-                                prompt = f"Translate the following text accurately from {src_lang_name} to {tgt_lang_name}. Provide ONLY the final translation output in {tgt_lang_name}:\n\n{final_input_text}"
-                            elif "Transcription" in service_choice:
-                                prompt = f"Clean up and format this transcript into professional paragraphs:\n\n{final_input_text}"
-                            elif "ATS CV" in service_choice:
-                                prompt = f"Optimize this resume text for ATS recruitment with strong professional bullet points and keywords:\n\n{final_input_text}"
-                            elif "Cover Letter" in service_choice:
-                                prompt = f"Write a compelling executive cover letter based on:\n\n{final_input_text}"
+                    genai.configure(api_key=gemini_api_key.strip())
+                    
+                    # Smart Model Fallback Router (Tries multiple model identifiers automatically)
+                    candidate_models = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro", "gemini-1.0-pro"]
+                    success = False
+                    
+                    for model_name in candidate_models:
+                        try:
+                            model = genai.GenerativeModel(model_name)
+                            if is_media_file and temp_media_path:
+                                uploaded_gemini_file = genai.upload_file(temp_media_path)
+                                prompt = "Accurately transcribe, format, and structure this audio/video recording into clean professional paragraphs:"
+                                response = model.generate_content([uploaded_gemini_file, prompt])
+                                ai_output = response.text
                             else:
-                                prompt = f"Proofread and polish this text for professional grammar and flow:\n\n{final_input_text}"
+                                if "Translation" in service_choice:
+                                    prompt = f"Translate the following text accurately from {src_lang_name} to {tgt_lang_name}. Provide ONLY the final translation output in {tgt_lang_name}:\n\n{final_input_text}"
+                                elif "Transcription" in service_choice:
+                                    prompt = f"Clean up and format this transcript into professional paragraphs:\n\n{final_input_text}"
+                                elif "ATS CV" in service_choice:
+                                    prompt = f"Optimize this resume text for ATS recruitment with strong professional bullet points and keywords:\n\n{final_input_text}"
+                                elif "Cover Letter" in service_choice:
+                                    prompt = f"Write a compelling executive cover letter based on:\n\n{final_input_text}"
+                                else:
+                                    prompt = f"Proofread and polish this text for professional grammar and flow:\n\n{final_input_text}"
+                                
+                                response = model.generate_content(prompt)
+                                if response and response.text:
+                                    ai_output = response.text.strip()
                             
-                            response = model.generate_content(prompt)
-                            if response and response.text:
-                                ai_output = response.text.strip()
-                            else:
-                                ai_output = "[Error: Model returned an empty response. Check API key permissions.]"
-                    except Exception as e:
-                        ai_output = f"[Gemini API Exception: {str(e)}]"
+                            if ai_output:
+                                success = True
+                                break
+                        except Exception:
+                            continue
+
+                    if temp_media_path:
+                        try:
+                            os.unlink(temp_media_path)
+                        except:
+                            pass
+
+                    if not success:
+                        ai_output = "[Error: All model router pathways failed. Please verify your Gemini API key permissions or quota limits.]"
 
                 if "Translation" in service_choice:
                     str_lit.session_state.processed_result = f"=== PROFESSIONAL GEMINI AI TRANSLATION RECORD ({src_lang_name} ➔ {tgt_lang_name}) ===\n\n{ai_output}\n\n[Certified by Global Professional Services Hub]"
